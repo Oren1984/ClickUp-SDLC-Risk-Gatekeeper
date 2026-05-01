@@ -1,0 +1,12 @@
+services:
+  rag-app:
+    build: .
+    ports:
+      - "8511:8501"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./vector_db:/app/vector_db
+      - ./results:/app/results
+    restart: unless-stopped
