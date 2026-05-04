@@ -1,0 +1,48 @@
+We are now doing a controlled public-facing rename for the repository:
+
+Old public name:
+RAG Retrieval Evaluation Lab
+
+New public/portfolio name:
+RAG Engineering Lab
+
+Important:
+This is NOT a technical refactor.
+Do NOT rename internal code identifiers, imports, package names, Docker service names, environment variable names, folders used by runtime code, CI paths, database names, or entrypoints.
+
+Scope of allowed changes ONLY:
+- README.md
+- docs/*
+- static site / static-demo
+- Streamlit UI visible titles, captions, sidebar labels, page config
+- notebooks titles and markdown cells only
+- portfolio descriptions
+- project overview docs
+- badges / hero section
+- presentation docs
+- QA docs
+
+Goal:
+Make the project appear consistently as:
+
+RAG Engineering Lab
+
+in all public-facing documentation, static demo pages, Streamlit UI text, notebook markdown headings, portfolio summaries, and presentation/QA materials.
+
+Rules:
+1. Replace the old public name "RAG Retrieval Evaluation Lab" with "RAG Engineering Lab" only in user-facing text.
+2. Do not perform blind global find-and-replace across code.
+3. If the old name appears inside runtime code, imports, module paths, Docker services, env vars, test paths, or config keys — leave it unchanged.
+4. If a place benefits from historical context, add a short line:
+   Previous name: RAG Retrieval Evaluation Lab
+   Current portfolio name: RAG Engineering Lab
+5. Keep the existing documentation structure unchanged.
+6. Do not rewrite the entire README from scratch unless required.
+7. Update only what is needed for naming consistency and portfolio polish.
+8. Preserve the current project meaning: a practical RAG lab for retrieval, chunking, evaluation, notebooks, UI, and demo presentation.
+
+After changes, provide a clear summary:
+- Files changed
+- What was renamed
+- What was intentionally not changed
+- Any remaining old-name references that were left because they look technical/risky

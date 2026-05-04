@@ -236,6 +236,8 @@ Create an environment file:
 cp .env.example .env
 ```
 
+See [docs/API_KEYS_GUIDE.md](docs/API_KEYS_GUIDE.md) for API key and environment setup.
+
 Run the Streamlit app:
 
 ```bash
