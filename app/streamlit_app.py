@@ -14,7 +14,7 @@ import streamlit as st
 
 # Must be the first Streamlit call
 st.set_page_config(
-    page_title="RAG Retrieval Evaluation Lab",
+    page_title="RAG Engineering Lab",
     layout="wide",
     initial_sidebar_state="expanded",
     page_icon="🧪",
@@ -160,7 +160,7 @@ st.markdown(
         margin-bottom: 0.75rem;
     ">
         <h1 style="margin:0; font-size:1.9rem; line-height:1.25;">
-            🧪 RAG Retrieval Evaluation Lab
+            🧪 RAG Engineering Lab
         </h1>
         <p style="margin:0.3rem 0 0; font-size:1.0rem; color:#333;">
             <strong>Oren Salami</strong> | 🧠 AI Systems Engineer

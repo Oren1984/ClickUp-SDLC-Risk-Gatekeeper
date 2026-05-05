@@ -1,7 +1,7 @@
 # Experiment Plan
 
 This document describes how to design and run controlled retrieval experiments
-using the RAG Retrieval Evaluation Lab.
+using the RAG Engineering Lab.
 
 ---
 

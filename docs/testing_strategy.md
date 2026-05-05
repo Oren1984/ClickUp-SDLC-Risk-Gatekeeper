@@ -2,7 +2,7 @@
 
 ## Overview
 
-The RAG Retrieval Evaluation Lab uses a **layered testing approach**:
+The RAG Engineering Lab uses a **layered testing approach**:
 
 1. **Stage smoke tests** — fast, standalone scripts run at the end of each build stage
 2. **Unit tests** — pure function and component tests in `tests/unit/`

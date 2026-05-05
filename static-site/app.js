@@ -1,5 +1,5 @@
 /* ============================================================
-   RAG Retrieval Evaluation Lab — Portfolio Page Scripts
+   RAG Engineering Lab — Portfolio Page Scripts
    ============================================================ */
 
 (function () {

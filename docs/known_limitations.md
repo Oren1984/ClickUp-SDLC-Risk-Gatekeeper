@@ -1,6 +1,6 @@
 # Known Limitations
 
-This document lists the current limitations of the RAG Retrieval Evaluation Lab.
+This document lists the current limitations of the RAG Engineering Lab.
 These are intentional design boundaries for v1, not bugs.
 
 ---

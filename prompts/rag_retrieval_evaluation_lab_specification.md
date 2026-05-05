@@ -1,9 +1,10 @@
-# RAG Retrieval Evaluation Lab — Technical Specification
+# RAG Engineering Lab — Technical Specification
 
 ## 1. Project Identity
 
 **Repository name:** `rag-retrieval-evaluation-lab`  
-**Project display name:** `RAG Retrieval Evaluation Lab`  
+**Project display name:** `RAG Engineering Lab`  
+**Previous name:** RAG Retrieval Evaluation Lab  
 **Project type:** RAG  
 **Primary UI:** Streamlit  
 **Execution style:** Local-first, modular, Dockerized, mock-friendly  

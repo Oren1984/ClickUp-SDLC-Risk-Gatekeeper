@@ -1,4 +1,4 @@
-# 🧠 RAG Retrieval Evaluation Lab
+# 🧠 RAG Engineering Lab
 
 **Oren Salami | 🧠 AI Systems Engineer**  
 Intelligent Systems • AI Agents • Data & Automation
@@ -9,7 +9,7 @@ A local-first RAG retrieval evaluation system for comparing chunking strategies,
 
 ## 🧠 Project Overview
 
-The **RAG Retrieval Evaluation Lab** is a modular, local-first system for building and evaluating the retrieval layer of Retrieval-Augmented Generation systems.
+The **RAG Engineering Lab** is a modular, local-first system for building and evaluating the retrieval layer of Retrieval-Augmented Generation systems.
 
 The project focuses on the technical backbone of RAG:
 

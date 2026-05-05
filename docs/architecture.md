@@ -2,7 +2,7 @@
 
 ## System Overview
 
-The RAG Retrieval Evaluation Lab is structured as a **five-layer pipeline** with a
+The RAG Engineering Lab is structured as a **five-layer pipeline** with a
 thin orchestrator (`RAGPipeline`) wiring each layer together. All layers are
 defined by abstract base classes in `src/core/contracts.py` and are individually
 replaceable without touching other layers.

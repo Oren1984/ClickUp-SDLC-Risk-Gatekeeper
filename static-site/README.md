@@ -1,4 +1,4 @@
-# Static Site — RAG Retrieval Evaluation Lab
+# Static Site — RAG Engineering Lab
 
 **Oren Salami | 🧠 AI Systems Engineer**  
 Intelligent Systems • AI Agents • Data & Automation
@@ -7,7 +7,7 @@ Intelligent Systems • AI Agents • Data & Automation
 
 ## Overview
 
-This folder contains a **standalone static portfolio page** for the RAG Retrieval Evaluation Lab project. It is built with plain HTML, CSS, and vanilla JavaScript — no framework, no build step, no dependencies.
+This folder contains a **standalone static portfolio page** for the RAG Engineering Lab project. It is built with plain HTML, CSS, and vanilla JavaScript — no framework, no build step, no dependencies.
 
 This is not the Streamlit application. It is not the RAG backend. It is a visual presentation layer designed to introduce the project to technical reviewers and recruiters.
 
@@ -67,7 +67,7 @@ No installation required. The site loads immediately from the local filesystem.
 
 ## What This Site Is
 
-- A **standalone static portfolio page** for the RAG Retrieval Evaluation Lab
+- A **standalone static portfolio page** for the RAG Engineering Lab
 - A **visual presentation layer** — suitable for sharing with technical reviewers
 - Deployable to any **static hosting service** or plain web server by uploading the folder as-is
 - **No build step required** — open `index.html` directly or serve it with any HTTP server
