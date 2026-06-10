@@ -1,7 +1,14 @@
 # SDLC Risk & Compliance Gatekeeper
 
-**Oren Salami | AI Systems Engineer**
-SDLC · Agile / Scrum · Risk Management · QA Readiness · Compliance · AI-Assisted Decision Support
+**Oren Salami | Technology Project Management + AI Tools**
+
+A ClickUp-style workflow demo for technical project management, designed to identify QA gaps, security risks, missing requirements, Definition of Done violations, compliance gaps, and architecture review needs before tasks enter development.
+
+This project demonstrates how AI-assisted review logic can support small teams, solo builders, and technical project managers by adding an early SDLC risk gate to task-management workflows.
+
+> **Demo mode:** This project currently uses local ClickUp-style mock data to demonstrate the workflow.
+> The architecture is adapter-based and can be extended to real ClickUp API integration or other
+> project-management tools such as Jira, Monday, Linear, Azure DevOps, or Notion.
 
 ---
 
@@ -10,10 +17,6 @@ SDLC · Agile / Scrum · Risk Management · QA Readiness · Compliance · AI-Ass
 The **SDLC Risk & Compliance Gatekeeper** is an automated risk review system that analyzes technical tasks before they enter development, and flags gaps in quality, security, architecture, and compliance.
 
 It simulates the role of an AI-assisted gate that sits between **task planning** and **development start** in an Agile/Scrum workflow — catching problems early, before they become expensive bugs, security incidents, or compliance violations.
-
-> **Demo mode:** This project currently uses local ClickUp-style mock data to demonstrate the workflow.
-> The architecture is adapter-based and can be extended to real ClickUp API integration or other
-> project-management tools such as Jira, Monday, Linear, Azure DevOps, or Notion.
 
 ---
 

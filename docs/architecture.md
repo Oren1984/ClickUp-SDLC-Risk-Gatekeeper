@@ -1,4 +1,6 @@
-# Architecture
+# Architecture — SDLC Risk & Compliance Gatekeeper
+
+**Oren Salami | Technology Project Management + AI Tools**
 
 ## System Design
 

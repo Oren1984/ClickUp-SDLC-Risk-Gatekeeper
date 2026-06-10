@@ -73,11 +73,10 @@ st.markdown(
             🛡️ SDLC Risk &amp; Compliance Gatekeeper
         </h1>
         <p style="margin:0.25rem 0 0; font-size:0.95rem; color:#444;">
-            <strong>Oren Salami</strong> | AI Systems Engineer &nbsp;|&nbsp;
-            SDLC &bull; Agile &bull; Risk Management &bull; QA Readiness &bull; Compliance
+            <strong>Oren Salami</strong> | Technology Project Management + AI Tools
         </p>
         <p style="margin:0.1rem 0 0; color:#888; font-size:0.82rem;">
-            ClickUp-style workflow demo &mdash; 20 mock tasks reviewed against deterministic SDLC risk rules
+            ClickUp-style workflow demo &mdash; SDLC risk gate for technical project management
         </p>
     </div>
     """,

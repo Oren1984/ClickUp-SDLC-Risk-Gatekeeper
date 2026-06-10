@@ -1,5 +1,7 @@
 # Project Overview: SDLC Risk & Compliance Gatekeeper
 
+**Oren Salami | Technology Project Management + AI Tools**
+
 ## What is this project?
 
 This is an AI-assisted SDLC quality gate that automatically reviews technical tasks
