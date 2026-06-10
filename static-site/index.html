@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDLC Risk &amp; Compliance Gatekeeper — Oren Salami</title>
+  <meta name="description" content="AI-assisted SDLC risk review for technical tasks, QA readiness, security review, compliance gaps, and Definition of Done validation. ClickUp-style workflow demo." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ── Navigation ──────────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-inner">
+    <span class="nav-brand">SDLC Risk &amp; Compliance Gatekeeper</span>
+    <ul class="nav-links">
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#solution">Solution</a></li>
+      <li><a href="#flows">Flows</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#demo">Demo</a></li>
+      <li><a href="#run">Run</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ── Hero ────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">Technology Project Management + AI Tools</div>
+    <h1>SDLC Risk &amp; Compliance Gatekeeper</h1>
+    <p class="hero-byline">Oren Salami &nbsp;|&nbsp; Technology Project Management + AI Tools</p>
+    <p class="hero-pitch">
+      AI-assisted SDLC risk review for technical tasks, user stories, QA readiness,
+      Definition of Done validation, security review, architecture review, and compliance
+      gaps — before work enters development.
+    </p>
+    <p class="hero-pitch" style="font-size:.95rem; color:#8aaec8; margin-bottom:28px;">
+      A ClickUp-style workflow demo for technical project management. The adapter-based
+      architecture can connect to ClickUp, Jira, Monday, Linear, Azure DevOps, or Notion.
+    </p>
+    <a href="#run" class="btn btn-primary">Run the Demo</a>
+    <a href="#flows" class="btn btn-outline">See Core Flows</a>
+    <p class="hero-meta">
+      Local demo &nbsp;·&nbsp; No API keys required &nbsp;·&nbsp;
+      All data is local mock JSON &nbsp;·&nbsp; 20 realistic ClickUp-style tasks
+    </p>
+  </div>
+</section>
+
+<!-- ── Problem ─────────────────────────────────────────────────────── -->
+<section id="problem">
+  <div class="container">
+    <p class="section-label">The Problem</p>
+    <h2 class="section-title">Tasks enter development before they're ready</h2>
+    <p class="section-intro">
+      Small teams, solo builders, and technical project managers often move tasks
+      into sprint without all the information needed to develop them safely.
+      The cost of catching gaps in planning is near zero.
+      The cost of catching them in production is high.
+    </p>
+
+    <div class="problem-grid">
+      <div class="problem-card">
+        <span class="icon">📋</span>
+        <strong>Missing Acceptance Criteria</strong>
+        <p>No clear definition of what "done" means. Developers must guess.</p>
+      </div>
+      <div class="problem-card">
+        <span class="icon">🧪</span>
+        <strong>No QA Plan</strong>
+        <p>Tasks enter development with no test cases, edge cases, or QA expectations defined.</p>
+      </div>
+      <div class="problem-card">
+        <span class="icon">🔒</span>
+        <strong>Security Without Validation</strong>
+        <p>Auth, payment, and encryption tasks proceed without security notes or threat model.</p>
+      </div>
+      <div class="problem-card">
+        <span class="icon">🤖</span>
+        <strong>AI Features Without Guardrails</strong>
+        <p>LLM features go into development without fallback behavior, safety controls, or content filters.</p>
+      </div>
+      <div class="problem-card">
+        <span class="icon">🏗️</span>
+        <strong>Architecture Changes Unreviewed</strong>
+        <p>Database migrations, API redesigns, and infrastructure changes skip technical review.</p>
+      </div>
+      <div class="problem-card">
+        <span class="icon">⚖️</span>
+        <strong>Compliance Without Evidence</strong>
+        <p>GDPR, PCI, and HIPAA tasks have no documented evidence, DPA reference, or sign-off.</p>
+      </div>
+      <div class="problem-card">
+        <span class="icon">✅</span>
+        <strong>Definition of Done Incomplete</strong>
+        <p>Tasks marked ready without confirming code review, staging deploy, or DoD checklist.</p>
+      </div>
+      <div class="problem-card">
+        <span class="icon">🚫</span>
+        <strong>Blocked but Active</strong>
+        <p>Tasks with unresolved dependencies are assigned to developers, causing blocked sprints.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Solution ────────────────────────────────────────────────────── -->
+<section id="solution">
+  <div class="container">
+    <p class="section-label">The Solution</p>
+    <h2 class="section-title">An automated SDLC gate before development starts</h2>
+    <p class="section-intro">
+      The SDLC Risk &amp; Compliance Gatekeeper reviews each task against 10 deterministic
+      rules and returns a structured assessment. Every task gets a risk score, a gate
+      decision, and practical recommendations before a developer touches it.
+    </p>
+
+    <div class="solution-grid">
+      <div class="solution-card">
+        <span class="score">0–100</span>
+        <div class="label">Risk Score</div>
+        <p>Weighted score based on rules triggered. Higher = more gaps.</p>
+      </div>
+      <div class="solution-card">
+        <span class="score" style="color:#16a34a;">Low</span>
+        <div class="label">Risk Level</div>
+        <p>Low · Medium · High · Critical — derived from score range.</p>
+      </div>
+      <div class="solution-card">
+        <span class="score" style="font-size:1.15rem; color:#1d6fa4;">Findings</span>
+        <div class="label">Gap List</div>
+        <p>Each triggered rule explains exactly what is missing and why it matters.</p>
+      </div>
+      <div class="solution-card">
+        <span class="score" style="font-size:1.15rem; color:#d97706;">Recs</span>
+        <div class="label">Recommendations</div>
+        <p>Practical next actions for the PM, QA, security, or architecture team.</p>
+      </div>
+      <div class="solution-card">
+        <span class="score" style="font-size:1.1rem; color:#dc2626;">Gate</span>
+        <div class="label">Gate Decision</div>
+        <p>One of six outcomes: Approved, Clarification, QA, Security, Arch, or Blocked.</p>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:40px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Gate Decision</th>
+            <th>Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>✅ Approved for Development</td>
+            <td>Task passes all quality gates — ready to enter sprint</td>
+          </tr>
+          <tr>
+            <td>💬 Needs Clarification</td>
+            <td>Minor gaps must be resolved before development starts</td>
+          </tr>
+          <tr>
+            <td>🧪 Requires QA Review</td>
+            <td>QA lead must review and approve before dev starts</td>
+          </tr>
+          <tr>
+            <td>🔒 Requires Security Review</td>
+            <td>Security, compliance, or AI-safety team must sign off</td>
+          </tr>
+          <tr>
+            <td>🏗️ Requires Architecture Review</td>
+            <td>Tech lead or architect must review system impact</td>
+          </tr>
+          <tr>
+            <td>🚫 Blocked</td>
+            <td>Cannot proceed — blocking dependency or critical gap unresolved</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ── Core Flows ───────────────────────────────────────────────────── -->
+<section id="flows">
+  <div class="container">
+    <p class="section-label">Core Review Flows</p>
+    <h2 class="section-title">What the gatekeeper reviews</h2>
+    <p class="section-intro">
+      Each task is analyzed across six review dimensions. Every dimension maps
+      directly to an SDLC concern that matters before development begins.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Flow</th>
+            <th>Input</th>
+            <th>Output</th>
+            <th>Category</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Task Readiness Review</strong></td>
+            <td>User story, description, acceptance criteria</td>
+            <td>Missing requirements, clarification needs, scope gaps</td>
+            <td><span class="tag tag-blue">Quality</span></td>
+          </tr>
+          <tr>
+            <td><strong>QA Readiness Check</strong></td>
+            <td>QA notes, test expectations, DoD status</td>
+            <td>QA review gaps, test readiness status, DoD violations</td>
+            <td><span class="tag tag-green">QA</span></td>
+          </tr>
+          <tr>
+            <td><strong>Security Risk Review</strong></td>
+            <td>Tags, description, security notes</td>
+            <td>Security review requirement, validation gaps, threat model status</td>
+            <td><span class="tag tag-red">Security</span></td>
+          </tr>
+          <tr>
+            <td><strong>Architecture Review Gate</strong></td>
+            <td>System, database, and integration context notes</td>
+            <td>Architecture review recommendation, system impact flag</td>
+            <td><span class="tag tag-purple">Architecture</span></td>
+          </tr>
+          <tr>
+            <td><strong>Compliance Gate</strong></td>
+            <td>Policy and evidence fields, tags, description</td>
+            <td>Compliance framework gaps, evidence requirements, action needed</td>
+            <td><span class="tag tag-amber">Compliance</span></td>
+          </tr>
+          <tr>
+            <td><strong>SDLC Decision Support</strong></td>
+            <td>Full task context — all fields combined</td>
+            <td>Gate decision, risk score, findings, and practical next actions</td>
+            <td><span class="tag tag-slate">SDLC</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-wrap" style="margin-top:40px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Rule</th>
+            <th>Category</th>
+            <th>What it detects</th>
+            <th>Weight</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>RULE-001</td><td><span class="tag tag-blue">Quality</span></td><td>Missing or insufficient acceptance criteria</td><td>20</td></tr>
+          <tr><td>RULE-002</td><td><span class="tag tag-green">QA</span></td><td>No QA notes or test plan</td><td>15</td></tr>
+          <tr><td>RULE-003</td><td><span class="tag tag-slate">Process</span></td><td>Definition of Done not confirmed</td><td>15</td></tr>
+          <tr><td>RULE-004</td><td><span class="tag tag-red">Security</span></td><td>Security-sensitive task without security notes</td><td>30</td></tr>
+          <tr><td>RULE-005</td><td><span class="tag tag-red">AI Safety</span></td><td>AI/LLM task without guardrails or fallback behavior</td><td>35</td></tr>
+          <tr><td>RULE-006</td><td><span class="tag tag-purple">Architecture</span></td><td>Architecture-impacting task without design review</td><td>25</td></tr>
+          <tr><td>RULE-007</td><td><span class="tag tag-blue">Scope</span></td><td>Critical priority task with vague scope</td><td>20</td></tr>
+          <tr><td>RULE-008</td><td><span class="tag tag-amber">Dependency</span></td><td>Blocked by unresolved dependency</td><td>25</td></tr>
+          <tr><td>RULE-009</td><td><span class="tag tag-amber">Compliance</span></td><td>Compliance task missing evidence or regulatory sign-off</td><td>35</td></tr>
+          <tr><td>RULE-010</td><td><span class="tag tag-slate">Timeline</span></td><td>Due date overdue or at immediate risk</td><td>10–20</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ── Architecture ─────────────────────────────────────────────────── -->
+<section id="architecture">
+  <div class="container">
+    <p class="section-label">Architecture</p>
+    <h2 class="section-title">Adapter-based, mock-first, future-ready</h2>
+    <p class="section-intro">
+      The system is intentionally flat and readable. The active demo uses local
+      ClickUp-style JSON. The adapter layer is designed to be replaced with
+      a real ClickUp API call — or any other project-management tool API.
+    </p>
+
+    <div class="arch-block">
+      <pre><span class="dim">── Demo Data Layer ─────────────────────────────────────────────────────</span>
+
+<span class="hl">data/clickup_demo/tasks.json</span>              <span class="dim">← 20 mock ClickUp-style tasks</span>
+<span class="hl">data/clickup_demo/policies.json</span>           <span class="dim">← risk thresholds + gate definitions</span>
+<span class="hl">data/clickup_demo/definition_of_done.json</span> <span class="dim">← DoD checklist</span>
+             │
+             ▼
+<span class="dim">── Integration Adapter ─────────────────────────────────────────────────</span>
+
+<span class="hl">src/core/clickup_adapter.py</span>               <span class="ok">← active mock adapter</span>
+                                           <span class="dim">  TODO: replace with ClickUp / Jira /</span>
+                                           <span class="dim">  Monday / Linear / Azure DevOps API</span>
+             │
+             ▼
+<span class="dim">── Risk Engine ─────────────────────────────────────────────────────────</span>
+
+<span class="hl">src/core/risk_rules.py</span>                    <span class="dim">← 10 SDLC risk rules (deterministic)</span>
+<span class="hl">src/core/risk_reviewer.py</span>                 <span class="dim">← scoring + gate decision logic</span>
+<span class="hl">src/core/compliance_checks.py</span>             <span class="dim">← GDPR / PCI-DSS / HIPAA / SOX</span>
+             │
+             ▼
+<span class="dim">── Report Layer ────────────────────────────────────────────────────────</span>
+
+<span class="hl">src/core/report_generator.py</span>              <span class="dim">← per-task + project summary</span>
+             │
+             ▼
+<span class="dim">── Dashboard ───────────────────────────────────────────────────────────</span>
+
+<span class="hl">app/streamlit_app.py</span>                      <span class="ok">← Streamlit SDLC risk dashboard</span></pre>
+    </div>
+
+    <p style="margin-top:20px; font-size:0.88rem; color:var(--text-muted);">
+      All components are pure Python with no external services required.
+      The risk engine is deterministic and runs offline.
+      No API keys, no cloud, no database.
+    </p>
+  </div>
+</section>
+
+<!-- ── Dashboard ───────────────────────────────────────────────────── -->
+<section id="dashboard">
+  <div class="container">
+    <p class="section-label">Dashboard Capabilities</p>
+    <h2 class="section-title">What the Streamlit dashboard shows</h2>
+    <p class="section-intro">
+      A four-tab Streamlit dashboard provides project-wide risk visibility,
+      per-task drill-down, compliance gap analysis, and project context.
+    </p>
+
+    <div class="cap-grid">
+      <div class="cap-item">
+        <span class="cap-icon">📊</span>
+        <div class="cap-text">
+          <strong>Project Risk Overview</strong>
+          <span>Summary metrics: total tasks, approved, blocked, high/critical, QA needed, security needed, architecture needed</span>
+        </div>
+      </div>
+      <div class="cap-item">
+        <span class="cap-icon">🗂️</span>
+        <div class="cap-text">
+          <strong>Task Risk Dashboard</strong>
+          <span>Full task list with risk score, level, gate decision, and expandable findings per task</span>
+        </div>
+      </div>
+      <div class="cap-item">
+        <span class="cap-icon">🔎</span>
+        <div class="cap-text">
+          <strong>Task Detail View</strong>
+          <span>Drill-down into any task: description, acceptance criteria, security/architecture/QA notes, findings, recommendations</span>
+        </div>
+      </div>
+      <div class="cap-item">
+        <span class="cap-icon">⚖️</span>
+        <div class="cap-text">
+          <strong>Compliance Gap Analysis</strong>
+          <span>Tasks flagged against GDPR, PCI-DSS, HIPAA, SOX, and general security — with evidence status and required actions</span>
+        </div>
+      </div>
+      <div class="cap-item">
+        <span class="cap-icon">🔍</span>
+        <div class="cap-text">
+          <strong>Sidebar Filters</strong>
+          <span>Filter by sprint, status, risk level, and gate decision — multi-select, live filter</span>
+        </div>
+      </div>
+      <div class="cap-item">
+        <span class="cap-icon">🏷️</span>
+        <div class="cap-text">
+          <strong>Risk Level Indicators</strong>
+          <span>Color-coded Low / Medium / High / Critical badges with weighted rule scores</span>
+        </div>
+      </div>
+      <div class="cap-item">
+        <span class="cap-icon">💡</span>
+        <div class="cap-text">
+          <strong>Recommendations</strong>
+          <span>Practical next actions for every gap found — not just flags, but actionable guidance</span>
+        </div>
+      </div>
+      <div class="cap-item">
+        <span class="cap-icon">🔒</span>
+        <div class="cap-text">
+          <strong>Security &amp; Compliance Review Indicators</strong>
+          <span>Tasks requiring security, architecture, or QA review highlighted with clear rationale</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Demo Data ────────────────────────────────────────────────────── -->
+<section id="demo">
+  <div class="container">
+    <p class="section-label">Demo Data</p>
+    <h2 class="section-title">20 realistic ClickUp-style tasks, all local</h2>
+    <p class="section-intro">
+      All demo data is fictional, safe, and stored in <code>data/clickup_demo/tasks.json</code>.
+      No real workspace is connected. Each task was designed to trigger a specific
+      combination of risk rules for demonstration purposes.
+    </p>
+
+    <div class="demo-grid">
+      <div class="demo-card">
+        <span class="risk-badge risk-critical">Critical</span>
+        <strong>Stripe Payment Integration</strong>
+        <p>PCI compliance task with no acceptance criteria, no QA plan, no security notes, no evidence. Score: 100/100.</p>
+      </div>
+      <div class="demo-card">
+        <span class="risk-badge risk-critical">Critical</span>
+        <strong>AI Recommendation Engine</strong>
+        <p>LLM feature with no guardrails, no fallback behavior, incomplete DoD. Score: 65/100.</p>
+      </div>
+      <div class="demo-card">
+        <span class="risk-badge risk-critical">Critical</span>
+        <strong>LLM Content Moderation</strong>
+        <p>AI moderation system with no safety controls, no acceptance criteria, no QA. Score: 85/100.</p>
+      </div>
+      <div class="demo-card">
+        <span class="risk-badge risk-critical">Critical</span>
+        <strong>Encrypt PII at Rest</strong>
+        <p>GDPR + PCI + security + architecture task with nothing defined. Score: 100/100.</p>
+      </div>
+      <div class="demo-card">
+        <span class="risk-badge risk-high">High</span>
+        <strong>OAuth2 Authentication</strong>
+        <p>Auth task with no acceptance criteria and no security notes or threat model.</p>
+      </div>
+      <div class="demo-card">
+        <span class="risk-badge risk-high">High</span>
+        <strong>Database Schema Migration</strong>
+        <p>Multi-table migration with no architecture review notes.</p>
+      </div>
+      <div class="demo-card">
+        <span class="risk-badge risk-high">High</span>
+        <strong>Deploy Sprint 4 to Production</strong>
+        <p>Critical priority, description: "Deploy." — no scope, no DoD, no QA plan.</p>
+      </div>
+      <div class="demo-card">
+        <span class="risk-badge risk-blocked">Blocked</span>
+        <strong>GraphQL API Refactor</strong>
+        <p>Blocked by unresolved dependency on the schema migration. Cannot proceed.</p>
+      </div>
+      <div class="demo-card">
+        <span class="risk-badge risk-low">Approved ✅</span>
+        <strong>Fix Typo on About Page</strong>
+        <p>Clean, well-scoped bugfix. Good acceptance criteria, DoD complete. Score: 10/100.</p>
+      </div>
+      <div class="demo-card">
+        <span class="risk-badge risk-low">Approved ✅</span>
+        <strong>Update Password Hashing to bcrypt</strong>
+        <p>Security task with complete notes, CISO sign-off reference. Score: 0/100.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Future Integrations ─────────────────────────────────────────── -->
+<section id="integrations">
+  <div class="container">
+    <p class="section-label">Integration Path</p>
+    <h2 class="section-title">ClickUp first — more tools to follow</h2>
+    <p class="section-intro">
+      The demo runs on local ClickUp-style mock data. The adapter is designed so that
+      swapping in a real API is the only change needed. The same risk engine works
+      for any task-management tool that exposes task fields.
+    </p>
+
+    <div class="integration-grid">
+      <div class="integration-pill active">
+        <span class="dot"></span>
+        ClickUp <span style="font-size:.75rem; color:#1d6fa4; margin-left:4px;">(demo active)</span>
+      </div>
+      <div class="integration-pill">
+        <span class="dot future"></span>
+        Jira
+      </div>
+      <div class="integration-pill">
+        <span class="dot future"></span>
+        Monday
+      </div>
+      <div class="integration-pill">
+        <span class="dot future"></span>
+        Linear
+      </div>
+      <div class="integration-pill">
+        <span class="dot future"></span>
+        Azure DevOps
+      </div>
+      <div class="integration-pill">
+        <span class="dot future"></span>
+        Notion
+      </div>
+      <div class="integration-pill">
+        <span class="dot future"></span>
+        GitHub Issues
+      </div>
+    </div>
+
+    <div style="margin-top:28px; font-size:0.88rem; color:var(--text-muted);">
+      <p>
+        See <code>src/core/clickup_adapter.py</code> for the integration TODO guide and
+        <code>docs/future_clickup_integration.md</code> for the step-by-step ClickUp API
+        integration path. Estimated integration effort for a live ClickUp connection:
+        <strong>1–2 days</strong>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Run ─────────────────────────────────────────────────────────── -->
+<section id="run">
+  <div class="container">
+    <p class="section-label">How to Run</p>
+    <h2 class="section-title">Run locally in two commands</h2>
+    <p class="section-intro">
+      No API keys, no cloud setup, no database. The demo runs entirely on local data.
+    </p>
+
+    <div class="run-section-grid">
+      <div class="run-card">
+        <h3>🖥️ Streamlit Dashboard</h3>
+        <div class="cmd-block">
+          <span class="comment"># Install dependencies</span><br>
+          <span class="cmd">pip install -r requirements.txt</span><br><br>
+          <span class="comment"># Run the dashboard</span><br>
+          <span class="cmd">streamlit run app/streamlit_app.py</span><br><br>
+          <span class="comment"># Open in browser</span><br>
+          <span class="url">http://localhost:8501</span>
+        </div>
+      </div>
+
+      <div class="run-card">
+        <h3>🌐 Static Portfolio Site</h3>
+        <div class="cmd-block">
+          <span class="comment"># Serve this site locally</span><br>
+          <span class="cmd">cd static-site</span><br>
+          <span class="cmd">python -m http.server 8000</span><br><br>
+          <span class="comment"># Open in browser</span><br>
+          <span class="url">http://localhost:8000</span>
+        </div>
+      </div>
+
+      <div class="run-card">
+        <h3>🐳 Docker</h3>
+        <div class="cmd-block">
+          <span class="comment"># Build and run</span><br>
+          <span class="cmd">docker compose up --build</span><br><br>
+          <span class="comment"># Open in browser</span><br>
+          <span class="url">http://localhost:8501</span>
+        </div>
+      </div>
+
+      <div class="run-card">
+        <h3>🧪 Tests</h3>
+        <div class="cmd-block">
+          <span class="comment"># Run all 36 tests</span><br>
+          <span class="cmd">pytest</span><br><br>
+          <span class="comment"># Verbose + coverage</span><br>
+          <span class="cmd">pytest -v --cov=src</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Project Category ─────────────────────────────────────────────── -->
+<section id="category">
+  <div class="container">
+    <p class="section-label">Project Category</p>
+    <h2 class="section-title">Technology Project Management + AI Tools</h2>
+    <p class="section-intro">
+      This project belongs to the Technology Project Management portfolio area.
+      It demonstrates how AI-assisted review logic can improve process quality
+      in Agile/Scrum teams without requiring a full AI engineering stack.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Audience</th>
+            <th>What this project demonstrates</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Technical Project Managers</strong></td>
+            <td>SDLC gate design, sprint quality control, task readiness validation</td>
+          </tr>
+          <tr>
+            <td><strong>QA Engineers</strong></td>
+            <td>Automated QA readiness checking, DoD enforcement, test plan visibility</td>
+          </tr>
+          <tr>
+            <td><strong>Security Engineers</strong></td>
+            <td>Pre-development security review, compliance gap detection, GDPR/PCI/HIPAA awareness</td>
+          </tr>
+          <tr>
+            <td><strong>DevOps / Platform Engineers</strong></td>
+            <td>Architecture review gate for infra/migration tasks, CI/CD impact detection</td>
+          </tr>
+          <tr>
+            <td><strong>AI Engineers</strong></td>
+            <td>AI guardrail checking, LLM task safety review, adapter-based integration pattern</td>
+          </tr>
+          <tr>
+            <td><strong>Engineering Managers</strong></td>
+            <td>Sprint risk visibility, early gap surfacing, decision-support automation</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:32px; background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow);">
+      <p style="font-size:.88rem; color:var(--text-muted); line-height:1.75;">
+        This project demonstrates <strong>practical AI-assisted process improvement</strong>
+        for technical project management — not pure ML engineering.
+        It shows how SDLC, QA, Security, Architecture Review, Compliance, and risk management
+        can be embedded into task-management workflows using lightweight, deterministic Python.
+        No LLM inference required. No cloud dependency. Runs entirely on local data.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ──────────────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <p><strong>SDLC Risk &amp; Compliance Gatekeeper</strong></p>
+    <p>Oren Salami &nbsp;|&nbsp; Technology Project Management + AI Tools</p>
+    <p style="margin-top:12px; font-size:.78rem;">
+      ClickUp-style workflow demo &nbsp;·&nbsp;
+      Local mock data &nbsp;·&nbsp;
+      No API keys required &nbsp;·&nbsp;
+      MIT License
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
