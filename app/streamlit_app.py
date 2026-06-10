@@ -1,4 +1,4 @@
-"""ClickUp SDLC Risk & Compliance Gatekeeper — Streamlit Dashboard"""
+"""SDLC Risk & Compliance Gatekeeper — Streamlit Dashboard"""
 from __future__ import annotations
 import os
 import sys
@@ -70,14 +70,14 @@ st.markdown(
     """
     <div style="padding:0.6rem 0 0.4rem; border-bottom:2px solid #e0e6ed; margin-bottom:0.8rem;">
         <h1 style="margin:0; font-size:1.8rem; line-height:1.25;">
-            🛡️ ClickUp — Automated SDLC Risk &amp; Compliance Gatekeeper
+            🛡️ SDLC Risk &amp; Compliance Gatekeeper
         </h1>
         <p style="margin:0.25rem 0 0; font-size:0.95rem; color:#444;">
             <strong>Oren Salami</strong> | AI Systems Engineer &nbsp;|&nbsp;
             SDLC &bull; Agile &bull; Risk Management &bull; QA Readiness &bull; Compliance
         </p>
         <p style="margin:0.1rem 0 0; color:#888; font-size:0.82rem;">
-            Demo data &mdash; 20 mock ClickUp tasks reviewed against deterministic SDLC risk rules
+            ClickUp-style workflow demo &mdash; 20 mock tasks reviewed against deterministic SDLC risk rules
         </p>
     </div>
     """,
@@ -116,8 +116,8 @@ with st.sidebar:
     selected_gates = st.multiselect("Gate Decision", all_gates, default=all_gates)
 
     st.divider()
-    st.caption("This demo uses local mock ClickUp task data. No real ClickUp API calls are made.")
-    st.caption("See `src/core/clickup_adapter.py` for future API integration TODOs.")
+    st.caption("This demo uses local ClickUp-style mock data. No real API calls are made.")
+    st.caption("See `src/core/clickup_adapter.py` for ClickUp integration TODOs and future tool support.")
 
 
 # ── Filter reports ────────────────────────────────────────────────────────
@@ -343,9 +343,10 @@ with tab_compliance:
 with tab_about:
     st.subheader("About This Project")
     st.markdown("""
-**ClickUp — Automated SDLC Risk & Compliance Gatekeeper** is a portfolio demonstration
-of an AI-assisted SDLC quality gate that automatically reviews technical tasks before
-they enter development or review.
+**SDLC Risk & Compliance Gatekeeper** is a portfolio demonstration of an AI-assisted
+SDLC quality gate that automatically reviews technical tasks before they enter
+development or review. The current demo uses a ClickUp-style workflow as its
+first integration example.
 
 ---
 
@@ -393,16 +394,20 @@ before they become expensive bugs, security incidents, or compliance violations.
 
 ### What is mock data?
 
-All 20 tasks in this demo are realistic but fictional ClickUp tasks. They are stored in
-`data/clickup_demo/tasks.json`. No real ClickUp workspace is connected.
+All 20 tasks are realistic but fictional. They use a ClickUp-style JSON schema and are
+stored in `data/clickup_demo/tasks.json`. No real workspace is connected.
 
 ---
 
-### Future ClickUp API integration
+### Integration & Future Support
 
-The `src/core/clickup_adapter.py` module is designed with clear TODO comments showing
-exactly where real ClickUp API calls would replace the local JSON loading.
-This includes: authentication, task pulling, risk label writing, comment posting, and status updates.
+The `src/core/clickup_adapter.py` module is the first supported integration adapter.
+It currently loads local JSON, but is designed so real API calls can replace it.
+
+The adapter-based architecture means the same risk engine can later connect to:
+**ClickUp**, Jira, Monday, Linear, Azure DevOps, Notion, or any tool with a task API.
+
+See `docs/future_clickup_integration.md` for the ClickUp integration step-by-step guide.
 
 ---
 
@@ -412,7 +417,7 @@ This includes: authentication, task pulling, risk label writing, comment posting
 |-------|-----------|
 | UI | Streamlit |
 | Risk Engine | Python (rule-based, deterministic) |
-| Data | JSON mock data (ClickUp schema) |
+| Data | JSON mock data (ClickUp-style schema) |
 | Tests | pytest |
 | Packaging | Docker, Docker Compose |
 

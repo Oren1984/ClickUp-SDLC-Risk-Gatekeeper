@@ -30,9 +30,11 @@ design choices for a focused portfolio demonstration.
 
 ## Integration
 
-- The ClickUp API integration is not implemented (see `docs/future_clickup_integration.md`).
+- The demo integration adapter (currently ClickUp-style) is not connected to a live API.
 - There is no webhook, automation trigger, or real-time event integration.
-- There is no write-back to ClickUp (no comment posting, label setting, or status update).
+- There is no write-back to any project-management tool (no comment posting, label setting, or status update).
+- See `docs/future_clickup_integration.md` for the ClickUp integration path.
+- The adapter architecture supports future extension to Jira, Monday, Linear, Azure DevOps, Notion, and others.
 
 ## Infrastructure
 
@@ -52,5 +54,5 @@ design choices for a focused portfolio demonstration.
 - Demonstrating understanding of SDLC, Agile, and risk management concepts
 - Portfolio presentation for engineering, QA, security, DevOps, and PM roles
 - Exploring how a risk gate fits into a sprint workflow
-- Starting point for a real implementation with ClickUp API integration
+- Starting point for a real integration with ClickUp, Jira, Monday, Linear, or other task-management tools
 - Educational demonstration of compliance framework awareness

@@ -1,4 +1,4 @@
-# Project Overview: ClickUp SDLC Risk & Compliance Gatekeeper
+# Project Overview: SDLC Risk & Compliance Gatekeeper
 
 ## What is this project?
 
@@ -44,9 +44,16 @@ The Streamlit dashboard shows:
 | Risk rules engine | Real — deterministic Python |
 | Compliance checks | Real — GDPR, PCI, HIPAA, SOX pattern matching |
 | Task data | Mock — 20 realistic ClickUp-style JSON tasks |
-| ClickUp API connection | Not implemented — clear TODOs in adapter |
+| Integration adapter | Not connected to live API — clear TODOs in `clickup_adapter.py` |
 | Risk scoring | Real — weighted rule-based scoring |
 | Gate decisions | Real — logic-driven based on detected rules |
+
+## Integration positioning
+
+The demo uses a **ClickUp-style workflow** as the first integration example.
+The adapter-based architecture (`src/core/clickup_adapter.py`) is designed so the same
+risk engine can later connect to real ClickUp, or be extended to support Jira, Monday,
+Linear, Azure DevOps, Notion, or any other task-management platform with a task API.
 
 ## SDLC positioning
 

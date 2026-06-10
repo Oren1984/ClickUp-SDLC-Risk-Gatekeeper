@@ -1,4 +1,4 @@
-# ClickUp — Automated SDLC Risk & Compliance Gatekeeper
+# SDLC Risk & Compliance Gatekeeper
 
 **Oren Salami | AI Systems Engineer**
 SDLC · Agile / Scrum · Risk Management · QA Readiness · Compliance · AI-Assisted Decision Support
@@ -7,12 +7,13 @@ SDLC · Agile / Scrum · Risk Management · QA Readiness · Compliance · AI-Ass
 
 ## Project Overview
 
-The **ClickUp SDLC Risk & Compliance Gatekeeper** is an automated risk review system that analyzes technical tasks before they enter development, and flags gaps in quality, security, architecture, and compliance.
+The **SDLC Risk & Compliance Gatekeeper** is an automated risk review system that analyzes technical tasks before they enter development, and flags gaps in quality, security, architecture, and compliance.
 
 It simulates the role of an AI-assisted gate that sits between **task planning** and **development start** in an Agile/Scrum workflow — catching problems early, before they become expensive bugs, security incidents, or compliance violations.
 
-> **Demo mode:** All data is local mock JSON. No real ClickUp API calls are made.
-> The adapter layer is designed for future ClickUp API integration.
+> **Demo mode:** This project currently uses local ClickUp-style mock data to demonstrate the workflow.
+> The architecture is adapter-based and can be extended to real ClickUp API integration or other
+> project-management tools such as Jira, Monday, Linear, Azure DevOps, or Notion.
 
 ---
 
@@ -66,7 +67,7 @@ Each task receives one of six gate decisions:
 ## Repository Structure
 
 ```
-clickup-sdlc-risk-gatekeeper/
+sdlc-risk-gatekeeper/
 ├── app/
 │   └── streamlit_app.py          # Streamlit dashboard
 ├── src/
@@ -74,11 +75,11 @@ clickup-sdlc-risk-gatekeeper/
 │       ├── risk_rules.py         # 10 SDLC risk rules
 │       ├── risk_reviewer.py      # Risk scoring and gate logic
 │       ├── compliance_checks.py  # GDPR, PCI, HIPAA, SOX checks
-│       ├── clickup_adapter.py    # Data loader (mock + future API)
+│       ├── clickup_adapter.py    # ClickUp-style data loader (mock + future API)
 │       └── report_generator.py  # Summary and task report builder
 ├── data/
 │   └── clickup_demo/
-│       ├── tasks.json                  # 20 mock ClickUp tasks
+│       ├── tasks.json                  # 20 mock ClickUp-style tasks
 │       ├── policies.json               # Risk thresholds and gate definitions
 │       ├── definition_of_done.json     # DoD checklist
 │       └── architecture_guidelines.json
@@ -107,8 +108,8 @@ clickup-sdlc-risk-gatekeeper/
 **Clone and set up:**
 
 ```bash
-git clone https://github.com/Oren1984/clickup-sdlc-risk-gatekeeper.git
-cd clickup-sdlc-risk-gatekeeper
+git clone https://github.com/Oren1984/sdlc-risk-gatekeeper.git
+cd sdlc-risk-gatekeeper
 python -m venv .venv
 
 # Windows
@@ -181,13 +182,17 @@ See [docs/demo_scenarios.md](docs/demo_scenarios.md) for full walkthrough.
 
 ---
 
-## Future ClickUp API Integration
+## Integration & Extension
+
+The demo uses a **ClickUp-style adapter** as the first supported workflow integration.
+The architecture is designed to support other project-management tools in the future:
+Jira, Monday, Linear, Azure DevOps, Notion, or any tool with a task API.
 
 See [docs/future_clickup_integration.md](docs/future_clickup_integration.md) and
-the TODO comments in `src/core/clickup_adapter.py`.
+the TODO comments in `src/core/clickup_adapter.py` for the ClickUp integration path.
 
-The adapter is mock-first by design. Switching to live data requires setting
-`CLICKUP_API_TOKEN` and uncommenting API call implementations.
+The adapter is mock-first by design. Connecting to live data requires setting
+`CLICKUP_API_TOKEN` and implementing the stubbed API call functions.
 
 ---
 
