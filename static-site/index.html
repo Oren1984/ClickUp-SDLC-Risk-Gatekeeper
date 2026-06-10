@@ -35,15 +35,12 @@
       Definition of Done validation, security review, architecture review, and compliance
       gaps — before work enters development.
     </p>
-    <p class="hero-pitch" style="font-size:.95rem; color:#8aaec8; margin-bottom:28px;">
-      A ClickUp-style workflow demo for technical project management. The adapter-based
-      architecture can connect to ClickUp, Jira, Monday, Linear, Azure DevOps, or Notion.
-    </p>
+    <p class="hero-sub">ClickUp-style workflow demo — SDLC risk gate for technical project management</p>
     <a href="#run" class="btn btn-primary">Run the Demo</a>
     <a href="#flows" class="btn btn-outline">See Core Flows</a>
     <p class="hero-meta">
       Local demo &nbsp;·&nbsp; No API keys required &nbsp;·&nbsp;
-      All data is local mock JSON &nbsp;·&nbsp; 20 realistic ClickUp-style tasks
+      All data is local mock JSON &nbsp;·&nbsp; 20 realistic tasks
     </p>
   </div>
 </section>
@@ -128,7 +125,7 @@
         <p>Low · Medium · High · Critical — derived from score range.</p>
       </div>
       <div class="solution-card">
-        <span class="score" style="font-size:1.15rem; color:#1d6fa4;">Findings</span>
+        <span class="score" style="font-size:1.15rem; color:var(--blue);">Findings</span>
         <div class="label">Gap List</div>
         <p>Each triggered rule explains exactly what is missing and why it matters.</p>
       </div>
@@ -279,7 +276,7 @@
     <p class="section-intro">
       The system is intentionally flat and readable. The active demo uses local
       ClickUp-style JSON. The adapter layer is designed to be replaced with
-      a real ClickUp API call — or any other project-management tool API.
+      a real project-management API when needed.
     </p>
 
     <div class="arch-block">
@@ -293,8 +290,7 @@
 <span class="dim">── Integration Adapter ─────────────────────────────────────────────────</span>
 
 <span class="hl">src/core/clickup_adapter.py</span>               <span class="ok">← active mock adapter</span>
-                                           <span class="dim">  TODO: replace with ClickUp / Jira /</span>
-                                           <span class="dim">  Monday / Linear / Azure DevOps API</span>
+                                           <span class="dim">  TODO: replace with real API</span>
              │
              ▼
 <span class="dim">── Risk Engine ─────────────────────────────────────────────────────────</span>
@@ -397,7 +393,7 @@
 <section id="demo">
   <div class="container">
     <p class="section-label">Demo Data</p>
-    <h2 class="section-title">20 realistic ClickUp-style tasks, all local</h2>
+    <h2 class="section-title">20 realistic tasks — all local mock data</h2>
     <p class="section-intro">
       All demo data is fictional, safe, and stored in <code>data/clickup_demo/tasks.json</code>.
       No real workspace is connected. Each task was designed to trigger a specific
@@ -459,112 +455,45 @@
   </div>
 </section>
 
-<!-- ── Future Integrations ─────────────────────────────────────────── -->
-<section id="integrations">
-  <div class="container">
-    <p class="section-label">Integration Path</p>
-    <h2 class="section-title">ClickUp first — more tools to follow</h2>
-    <p class="section-intro">
-      The demo runs on local ClickUp-style mock data. The adapter is designed so that
-      swapping in a real API is the only change needed. The same risk engine works
-      for any task-management tool that exposes task fields.
-    </p>
-
-    <div class="integration-grid">
-      <div class="integration-pill active">
-        <span class="dot"></span>
-        ClickUp <span style="font-size:.75rem; color:#1d6fa4; margin-left:4px;">(demo active)</span>
-      </div>
-      <div class="integration-pill">
-        <span class="dot future"></span>
-        Jira
-      </div>
-      <div class="integration-pill">
-        <span class="dot future"></span>
-        Monday
-      </div>
-      <div class="integration-pill">
-        <span class="dot future"></span>
-        Linear
-      </div>
-      <div class="integration-pill">
-        <span class="dot future"></span>
-        Azure DevOps
-      </div>
-      <div class="integration-pill">
-        <span class="dot future"></span>
-        Notion
-      </div>
-      <div class="integration-pill">
-        <span class="dot future"></span>
-        GitHub Issues
-      </div>
-    </div>
-
-    <div style="margin-top:28px; font-size:0.88rem; color:var(--text-muted);">
-      <p>
-        See <code>src/core/clickup_adapter.py</code> for the integration TODO guide and
-        <code>docs/future_clickup_integration.md</code> for the step-by-step ClickUp API
-        integration path. Estimated integration effort for a live ClickUp connection:
-        <strong>1–2 days</strong>.
-      </p>
-    </div>
-  </div>
-</section>
-
 <!-- ── Run ─────────────────────────────────────────────────────────── -->
 <section id="run">
   <div class="container">
     <p class="section-label">How to Run</p>
-    <h2 class="section-title">Run locally in two commands</h2>
+    <h2 class="section-title">Run locally</h2>
     <p class="section-intro">
       No API keys, no cloud setup, no database. The demo runs entirely on local data.
     </p>
 
-    <div class="run-section-grid">
-      <div class="run-card">
-        <h3>🖥️ Streamlit Dashboard</h3>
-        <div class="cmd-block">
-          <span class="comment"># Install dependencies</span><br>
-          <span class="cmd">pip install -r requirements.txt</span><br><br>
-          <span class="comment"># Run the dashboard</span><br>
-          <span class="cmd">streamlit run app/streamlit_app.py</span><br><br>
-          <span class="comment"># Open in browser</span><br>
-          <span class="url">http://localhost:8501</span>
+    <div class="run-grid">
+      <div class="run-item">
+        <div class="run-item-header">Streamlit Demo</div>
+        <div class="run-cmds">
+          <span>streamlit run app/streamlit_app.py</span>
         </div>
+        <div class="run-url-line">Open: http://localhost:8501</div>
       </div>
 
-      <div class="run-card">
-        <h3>🌐 Static Portfolio Site</h3>
-        <div class="cmd-block">
-          <span class="comment"># Serve this site locally</span><br>
-          <span class="cmd">cd static-site</span><br>
-          <span class="cmd">python -m http.server 8000</span><br><br>
-          <span class="comment"># Open in browser</span><br>
-          <span class="url">http://localhost:8000</span>
+      <div class="run-item">
+        <div class="run-item-header">Static Site</div>
+        <div class="run-cmds">
+          <span>cd static-site</span>
+          <span>python -m http.server 8000</span>
         </div>
+        <div class="run-url-line">Open: http://localhost:8000</div>
       </div>
 
-      <div class="run-card">
-        <h3>🐳 Docker</h3>
-        <div class="cmd-block">
-          <span class="comment"># Build and run</span><br>
-          <span class="cmd">docker compose up --build</span><br><br>
-          <span class="comment"># Open in browser</span><br>
-          <span class="url">http://localhost:8501</span>
+      <div class="run-item">
+        <div class="run-item-header">Tests</div>
+        <div class="run-cmds">
+          <span>pytest</span>
         </div>
-      </div>
-
-      <div class="run-card">
-        <h3>🧪 Tests</h3>
-        <div class="cmd-block">
-          <span class="comment"># Run all 36 tests</span><br>
-          <span class="cmd">pytest</span><br><br>
-          <span class="comment"># Verbose + coverage</span><br>
-          <span class="cmd">pytest -v --cov=src</span>
-        </div>
+        <div class="run-url-line">Run all tests locally</div>
       </div>
     </div>
+
+    <p class="run-docker-note">
+      Optional Docker: <code>docker compose up --build</code>
+    </p>
   </div>
 </section>
 
@@ -616,7 +545,7 @@
       </table>
     </div>
 
-    <div style="margin-top:32px; background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow);">
+    <div style="margin-top:32px; background:var(--white); border:1.5px solid var(--border); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow);">
       <p style="font-size:.88rem; color:var(--text-muted); line-height:1.75;">
         This project demonstrates <strong>practical AI-assisted process improvement</strong>
         for technical project management — not pure ML engineering.
