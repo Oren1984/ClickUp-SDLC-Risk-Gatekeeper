@@ -1,10 +1,8 @@
-"""RAG Retrieval Evaluation Lab — Streamlit UI"""
+"""ClickUp SDLC Risk & Compliance Gatekeeper — Streamlit Dashboard"""
 from __future__ import annotations
-
 import os
 import sys
 
-# Ensure project root is on the path regardless of CWD
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.dirname(_HERE)
 if _ROOT not in sys.path:
@@ -12,622 +10,414 @@ if _ROOT not in sys.path:
 
 import streamlit as st
 
-# Must be the first Streamlit call
 st.set_page_config(
-    page_title="RAG Engineering Lab",
+    page_title="SDLC Risk Gatekeeper",
     layout="wide",
     initial_sidebar_state="expanded",
-    page_icon="🧪",
+    page_icon="🛡️",
 )
 
-from src.core.config import settings
-from src.core.exceptions import (
-    ConfigurationError,
-    EvaluationError,
-    RAGLabError,
-    ValidationError,
-)
-from src.observability.health import check_health
-from src.observability.metrics import METRICS
-from src.security.file_validation import validate_file
-from src.security.prompt_safety import check_prompt_safety
+from src.core.clickup_adapter import load_tasks
+from src.core.risk_reviewer import RiskReviewer
+from src.core.compliance_checks import check_compliance
+from src.core.report_generator import generate_task_report, generate_summary_report
 
-# Create runtime directories on startup
-for _d in [
-    settings.data_dir,
-    os.path.join(settings.data_dir, "raw"),
-    os.path.join(settings.data_dir, "ground_truth"),
-    settings.vector_db_dir,
-    settings.results_dir,
-]:
-    os.makedirs(_d, exist_ok=True)
 
-# ══════════════════════════════════════════════════════════════════════════
-# Session state
-# ══════════════════════════════════════════════════════════════════════════
+# ── Constants ─────────────────────────────────────────────────────────────
 
-_SS_DEFAULTS: dict = {
-    "pipeline": None,
-    "index_built": False,
-    "last_build_summary": None,
-    "last_retrieval_results": [],
-    "last_evaluation_summary": None,
-    "last_evaluation_results": [],
-    "built_with_config": {},
+RISK_COLORS = {
+    "Low":      "#28a745",
+    "Medium":   "#ffc107",
+    "High":     "#fd7e14",
+    "Critical": "#dc3545",
 }
-for _k, _v in _SS_DEFAULTS.items():
-    if _k not in st.session_state:
-        st.session_state[_k] = _v
+
+GATE_ICONS = {
+    "Approved for Development":    "✅",
+    "Needs Clarification":         "💬",
+    "Requires QA Review":          "🧪",
+    "Requires Security Review":    "🔒",
+    "Requires Architecture Review":"🏗️",
+    "Blocked":                     "🚫",
+}
+
+PRIORITY_ORDER = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+RISK_ORDER = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
 
 
-# ══════════════════════════════════════════════════════════════════════════
-# Factory helpers
-# ══════════════════════════════════════════════════════════════════════════
+# ── Load and review data ───────────────────────────────────────────────────
 
-def create_embedding_provider(provider_name: str, model_name: str):
-    if provider_name == "mock":
-        from src.embeddings.mock_embedding_provider import MockEmbeddingProvider
-        return MockEmbeddingProvider()
-    if provider_name == "huggingface":
-        from src.embeddings.huggingface_provider import HuggingFaceEmbeddingProvider
-        return HuggingFaceEmbeddingProvider(model_name=model_name)
-    if provider_name == "openai":
-        from src.embeddings.openai_provider import OpenAIEmbeddingProvider
-        return OpenAIEmbeddingProvider(api_key=settings.openai_api_key, model_name=model_name)
-    if provider_name == "gemini":
-        from src.embeddings.gemini_provider import GeminiEmbeddingProvider
-        return GeminiEmbeddingProvider(api_key=settings.gemini_api_key, model_name=model_name)
-    raise ConfigurationError(f"Unknown embedding provider: {provider_name!r}")
+@st.cache_data(show_spinner=False)
+def load_and_review():
+    tasks = load_tasks()
+    reviewer = RiskReviewer()
+    reports = []
+    for task in tasks:
+        result = reviewer.review(task)
+        report = generate_task_report(task, result)
+        report["task_obj"] = task
+        reports.append(report)
+    summary = generate_summary_report(reports)
+    return tasks, reports, summary
 
 
-def create_vector_store(store_name: str):
-    if store_name == "chroma":
-        from src.vectorstores.chroma_store import ChromaVectorStore
-        return ChromaVectorStore(
-            persist_directory=os.path.join(settings.vector_db_dir, "chroma"),
-        )
-    if store_name == "faiss":
-        from src.vectorstores.faiss_store import FaissVectorStore
-        return FaissVectorStore(
-            persist_directory=os.path.join(settings.vector_db_dir, "faiss"),
-        )
-    raise ConfigurationError(f"Unknown vector store: {store_name!r}")
+tasks, reports, summary = load_and_review()
 
 
-def create_chunker(strategy: str, chunk_size: int, chunk_overlap: int):
-    if strategy == "recursive":
-        from src.chunking.recursive_chunker import RecursiveChunker
-        return RecursiveChunker(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-    if strategy == "fixed":
-        from src.chunking.fixed_chunker import FixedChunker
-        return FixedChunker(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-    raise ConfigurationError(f"Unknown chunking strategy: {strategy!r}")
-
-
-def create_reranker(_use_reranker: bool):
-    # v1: PassThroughReranker only. CrossEncoderReranker support in a future version.
-    from src.retrieval.reranker import PassThroughReranker
-    return PassThroughReranker()
-
-
-# ══════════════════════════════════════════════════════════════════════════
-# UI helpers
-# ══════════════════════════════════════════════════════════════════════════
-
-def _save_upload(uploaded_file) -> str:
-    """Validate and persist an uploaded Streamlit file under data/raw/."""
-    raw_dir = os.path.join(settings.data_dir, "raw")
-    os.makedirs(raw_dir, exist_ok=True)
-    content = uploaded_file.getvalue()
-    safe_name = validate_file(
-        uploaded_file.name, len(content), max_upload_mb=settings.max_upload_mb,
-    )
-    save_path = os.path.join(raw_dir, safe_name)
-    with open(save_path, "wb") as f:
-        f.write(content)
-    return save_path
-
-
-def _cfg_snapshot(provider, model, store, strategy, csize, coverlap) -> dict:
-    return {
-        "provider": provider, "model": model, "store": store,
-        "strategy": strategy, "chunk_size": int(csize), "chunk_overlap": int(coverlap),
-    }
-
-
-def _cfg_changed(cfg: dict) -> bool:
-    return (
-        bool(st.session_state.index_built)
-        and st.session_state.built_with_config != cfg
-    )
-
-
-def _fmt_size(n_bytes: int) -> str:
-    if n_bytes < 1_048_576:
-        return f"{n_bytes / 1024:.1f} KB"
-    return f"{n_bytes / 1_048_576:.2f} MB"
-
-
-# ══════════════════════════════════════════════════════════════════════════
-# Page header
-# ══════════════════════════════════════════════════════════════════════════
+# ── Header ────────────────────────────────────────────────────────────────
 
 st.markdown(
     """
-    <div style="
-        padding: 0.75rem 0 0.5rem;
-        border-bottom: 2px solid #e0e6ed;
-        margin-bottom: 0.75rem;
-    ">
-        <h1 style="margin:0; font-size:1.9rem; line-height:1.25;">
-            🧪 RAG Engineering Lab
+    <div style="padding:0.6rem 0 0.4rem; border-bottom:2px solid #e0e6ed; margin-bottom:0.8rem;">
+        <h1 style="margin:0; font-size:1.8rem; line-height:1.25;">
+            🛡️ ClickUp — Automated SDLC Risk &amp; Compliance Gatekeeper
         </h1>
-        <p style="margin:0.3rem 0 0; font-size:1.0rem; color:#333;">
-            <strong>Oren Salami</strong> | 🧠 AI Systems Engineer
+        <p style="margin:0.25rem 0 0; font-size:0.95rem; color:#444;">
+            <strong>Oren Salami</strong> | AI Systems Engineer &nbsp;|&nbsp;
+            SDLC &bull; Agile &bull; Risk Management &bull; QA Readiness &bull; Compliance
         </p>
-        <p style="margin:0.1rem 0 0; color:#888; font-size:0.85rem;">
-            Intelligent Systems &bull; AI Agents &bull; Data &amp; Automation
+        <p style="margin:0.1rem 0 0; color:#888; font-size:0.82rem;">
+            Demo data &mdash; 20 mock ClickUp tasks reviewed against deterministic SDLC risk rules
         </p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-# ══════════════════════════════════════════════════════════════════════════
-# Sidebar
-# ══════════════════════════════════════════════════════════════════════════
+
+# ── Summary Metrics ────────────────────────────────────────────────────────
+
+st.subheader("Project Risk Overview")
+m1, m2, m3, m4, m5, m6, m7 = st.columns(7)
+m1.metric("Total Tasks",           summary["total_tasks"])
+m2.metric("✅ Approved",           summary["approved_for_development"])
+m3.metric("🚫 Blocked",            summary["blocked"],            delta=None)
+m4.metric("🔴 High / Critical",    summary["high_risk_or_critical"])
+m5.metric("🧪 Needs QA",           summary["requires_qa_review"])
+m6.metric("🔒 Needs Security",     summary["requires_security_review"])
+m7.metric("🏗️ Needs Arch Review",  summary["requires_architecture_review"])
+
+
+# ── Sidebar filters ────────────────────────────────────────────────────────
 
 with st.sidebar:
-    st.header("⚙️ Configuration")
+    st.header("🔍 Filters")
 
-    mock_mode = st.toggle(
-        "Mock Mode",
-        value=True,
-        key="sw_mock_mode",
-        help="Deterministic mock embeddings — no API key required.",
-    )
+    all_sprints = sorted({r["sprint"] for r in reports})
+    selected_sprints = st.multiselect("Sprint", all_sprints, default=all_sprints)
 
-    # ── Embedding ──────────────────────────────────────────────────────────
-    st.subheader("Embedding")
-    provider_name: str = st.selectbox(
-        "Provider",
-        ["mock", "huggingface", "openai", "gemini"],
-        index=0,
-        key="sw_provider",
-    )
+    all_statuses = sorted({r["status"] for r in reports})
+    selected_statuses = st.multiselect("Status", all_statuses, default=all_statuses)
 
-    if mock_mode and provider_name != "mock":
-        st.caption("ℹ️ Mock Mode is ON — consider switching to the 'mock' provider.")
+    all_risk_levels = ["Critical", "High", "Medium", "Low"]
+    selected_risk = st.multiselect("Risk Level", all_risk_levels, default=all_risk_levels)
 
-    _model_map = {
-        "mock":        ["mock-384"],
-        "huggingface": [
-            "sentence-transformers/all-MiniLM-L6-v2",
-            "BAAI/bge-base-en-v1.5",
-            "intfloat/e5-base",
-        ],
-        "openai":  ["text-embedding-3-small", "text-embedding-3-large", "text-embedding-ada-002"],
-        "gemini":  ["models/embedding-001", "models/text-embedding-004"],
-    }
-    model_name: str = st.selectbox(
-        "Model", _model_map.get(provider_name, ["mock-384"]), key="sw_model",
-    )
-
-    # API key guard for paid providers
-    if provider_name == "openai" and not settings.openai_api_key:
-        st.error("OPENAI_API_KEY not set. Add it to .env or use mock mode.")
-    if provider_name == "gemini" and not settings.gemini_api_key:
-        st.error("GEMINI_API_KEY not set. Add it to .env or use mock mode.")
-
-    # ── Vector store ───────────────────────────────────────────────────────
-    st.subheader("Vector Store")
-    store_name: str = st.selectbox("Store", ["chroma", "faiss"], key="sw_store")
-
-    # ── Chunking ───────────────────────────────────────────────────────────
-    st.subheader("Chunking")
-    chunk_strategy: str = st.selectbox(
-        "Strategy", ["recursive", "fixed"], key="sw_strategy",
-    )
-    chunk_size: int = int(
-        st.number_input("Chunk Size", min_value=200, max_value=1500, value=500,
-                        step=50, key="sw_chunk_size")
-    )
-    chunk_overlap: int = int(
-        st.number_input("Chunk Overlap", min_value=0, max_value=300, value=100,
-                        step=10, key="sw_chunk_overlap")
-    )
-    _overlap_invalid = chunk_overlap >= chunk_size
-    if _overlap_invalid:
-        st.error("Chunk overlap must be less than chunk size.")
-
-    # ── Retrieval ──────────────────────────────────────────────────────────
-    st.subheader("Retrieval")
-    top_k: int = int(
-        st.number_input("Top-K", min_value=1, max_value=20, value=5, key="sw_top_k")
-    )
-
-    # ── Options ────────────────────────────────────────────────────────────
-    st.subheader("Options")
-    use_reranker: bool = st.toggle(
-        "Use Reranker", value=False, key="sw_use_reranker",
-        help="v1: PassThroughReranker (no-op). Full cross-encoder in a future version.",
-    )
-    redact_pii: bool = st.toggle("PII Redaction", value=False, key="sw_redact_pii")
-
-    # ── Config change warning ──────────────────────────────────────────────
-    _cfg = _cfg_snapshot(
-        provider_name, model_name, store_name, chunk_strategy, chunk_size, chunk_overlap,
-    )
-    if _cfg_changed(_cfg):
-        st.warning("⚠️ Config changed since last build — rebuild the index.")
-
-    # ── Index status ───────────────────────────────────────────────────────
-    if st.session_state.index_built and st.session_state.last_build_summary:
-        _bs = st.session_state.last_build_summary
-        st.success(
-            f"✅ Index ready  \n"
-            f"{_bs.get('chunks_created','?')} chunks · "
-            f"{_bs.get('embedding_provider','?')} / {_bs.get('vector_store','?')}"
-        )
+    all_gates = list(GATE_ICONS.keys())
+    selected_gates = st.multiselect("Gate Decision", all_gates, default=all_gates)
 
     st.divider()
-    st.subheader("Actions")
+    st.caption("This demo uses local mock ClickUp task data. No real ClickUp API calls are made.")
+    st.caption("See `src/core/clickup_adapter.py` for future API integration TODOs.")
 
-    build_clicked: bool = st.button(
-        "🔨 Build Index",
-        type="primary",
-        key="btn_build",
-        use_container_width=True,
-        disabled=_overlap_invalid,
-    )
-    clear_clicked: bool = st.button(
-        "🗑️ Clear / Reset",
-        key="btn_clear",
-        use_container_width=True,
-    )
 
-    # Handle clear immediately (before tabs render)
-    if clear_clicked:
-        if st.session_state.pipeline is not None:
-            try:
-                st.session_state.pipeline.clear()
-            except Exception:
-                pass
-        for _k, _v in _SS_DEFAULTS.items():
-            st.session_state[_k] = _v
-        st.toast("Pipeline cleared.", icon="🗑️")
+# ── Filter reports ────────────────────────────────────────────────────────
 
-# ══════════════════════════════════════════════════════════════════════════
-# Tabs
-# ══════════════════════════════════════════════════════════════════════════
+filtered = [
+    r for r in reports
+    if r["sprint"] in selected_sprints
+    and r["status"] in selected_statuses
+    and r["risk_level"] in selected_risk
+    and r["gate_decision"] in selected_gates
+]
+filtered.sort(key=lambda r: (RISK_ORDER.get(r["risk_level"], 9), PRIORITY_ORDER.get(r["task_obj"].get("priority",""), 9)))
 
-tab_ingest, tab_retrieval, tab_eval, tab_status = st.tabs(
-    ["📥 Ingestion", "🔍 Retrieval Demo", "📊 Evaluation", "🩺 System Status"]
+
+# ── Tabs ──────────────────────────────────────────────────────────────────
+
+tab_dashboard, tab_detail, tab_compliance, tab_about = st.tabs(
+    ["📋 Task Risk Dashboard", "🔎 Task Detail", "⚖️ Compliance View", "ℹ️ About This Project"]
 )
 
-# ─────────────────────────────────────────────────────────────────────────
-# Tab 1 — Ingestion
-# ─────────────────────────────────────────────────────────────────────────
-
-with tab_ingest:
-    st.subheader("Document Ingestion")
-    st.caption(
-        "Upload a document, adjust the pipeline configuration in the sidebar, "
-        "then click **🔨 Build Index**."
-    )
-
-    uploaded_file = st.file_uploader(
-        "Upload document",
-        type=["pdf", "txt", "md", "html", "htm"],
-        key="file_uploader",
-        help="Supported formats: PDF, TXT, Markdown, HTML, HTM",
-    )
-
-    if uploaded_file is not None:
-        _content = uploaded_file.getvalue()
-        _c1, _c2, _c3 = st.columns(3)
-        _c1.metric("Filename", uploaded_file.name)
-        _c2.metric("Size", _fmt_size(len(_content)))
-        _c3.metric("Type", os.path.splitext(uploaded_file.name)[1].lower() or "—")
-
-    # ── Build Index handler ────────────────────────────────────────────────
-    if build_clicked:
-        if uploaded_file is None:
-            st.error("Please upload a document before building the index.")
-            st.toast("No file uploaded.", icon="⚠️")
-        elif _overlap_invalid:
-            st.error("Fix chunk overlap (must be less than chunk size) before building.")
-        else:
-            with st.spinner("Building index — please wait…"):
-                try:
-                    # Clear previous pipeline/store for a clean rebuild
-                    if st.session_state.pipeline is not None:
-                        try:
-                            st.session_state.pipeline.clear()
-                        except Exception:
-                            pass
-
-                    saved_path = _save_upload(uploaded_file)
-                    _provider = create_embedding_provider(provider_name, model_name)
-                    _store = create_vector_store(store_name)
-                    _chunker = create_chunker(chunk_strategy, chunk_size, chunk_overlap)
-                    _reranker = create_reranker(use_reranker)
-
-                    from src.pipeline.rag_pipeline import RAGPipeline
-                    _pipeline = RAGPipeline(_provider, _store, _chunker, _reranker)
-                    _summary = _pipeline.build_index(saved_path, redact_pii=redact_pii)
-
-                    st.session_state.pipeline = _pipeline
-                    st.session_state.index_built = True
-                    st.session_state.last_build_summary = _summary
-                    st.session_state.built_with_config = _cfg
-                    st.toast(
-                        f"Index built! {_summary['chunks_created']} chunks.", icon="✅"
-                    )
-
-                except ValidationError as exc:
-                    st.error(f"Validation error: {exc}")
-                    METRICS.record_error(str(exc))
-                    st.toast("Validation error — see Ingestion tab.", icon="❌")
-                except RAGLabError as exc:
-                    st.error(f"Pipeline error: {exc}")
-                    st.toast("Build failed — see Ingestion tab.", icon="❌")
-                except Exception as exc:
-                    st.error(f"Unexpected error ({type(exc).__name__}): {exc}")
-                    METRICS.record_error(str(exc))
-                    st.toast("Build failed — see Ingestion tab.", icon="❌")
-
-    # ── Build summary ──────────────────────────────────────────────────────
-    if st.session_state.last_build_summary:
-        _s = st.session_state.last_build_summary
-        st.success("✅ Index is ready for querying.")
-        st.subheader("Last Build Summary")
-        _sc1, _sc2, _sc3 = st.columns(3)
-        _sc1.metric("Doc ID", _s.get("doc_id", "—"))
-        _sc2.metric("Chunks Created", _s.get("chunks_created", 0))
-        _sc3.metric(
-            "Provider / Store",
-            f"{_s.get('embedding_provider','?')} / {_s.get('vector_store','?')}",
-        )
-        with st.expander("Source path"):
-            st.code(_s.get("source", ""), language=None)
-    elif not build_clicked:
-        st.info(
-            "Upload a document and click **🔨 Build Index** in the sidebar "
-            "to start the ingestion pipeline."
-        )
 
 # ─────────────────────────────────────────────────────────────────────────
-# Tab 2 — Retrieval Demo
+# Tab 1 — Task Risk Dashboard
 # ─────────────────────────────────────────────────────────────────────────
 
-with tab_retrieval:
-    st.subheader("Retrieval Demo")
-    st.caption(
-        "Retrieve the most relevant document chunks for a natural-language query. "
-        "No LLM generation — this project returns retrieved chunks only."
-    )
+with tab_dashboard:
+    if not filtered:
+        st.info("No tasks match the current filters.")
+    else:
+        st.caption(f"Showing {len(filtered)} of {len(reports)} tasks — sorted by risk level, then priority.")
+        for r in filtered:
+            task = r["task_obj"]
+            risk_color = RISK_COLORS.get(r["risk_level"], "#6c757d")
+            gate_icon = GATE_ICONS.get(r["gate_decision"], "❓")
+            priority = task.get("priority", "").upper()
 
-    _query_input = st.text_area(
-        "Query",
-        placeholder="e.g. What chunking strategies are available?",
-        height=90,
-        key="query_input",
-    )
-    _run_retrieval = st.button("🔍 Run Retrieval", type="primary", key="btn_run_retrieval")
+            with st.expander(
+                f"{gate_icon} **{r['task_id']}** — {r['title']}  |  "
+                f"Risk: {r['risk_level']} ({r['risk_score']}/100)  |  {r['gate_decision']}",
+                expanded=False,
+            ):
+                col1, col2, col3, col4 = st.columns(4)
+                col1.markdown(f"**Sprint:** {r['sprint']}")
+                col2.markdown(f"**Status:** {r['status']}")
+                col3.markdown(f"**Priority:** `{priority}`")
+                col4.markdown(f"**Assignee:** {r['assignee']}")
 
-    if _run_retrieval:
-        if not st.session_state.index_built or st.session_state.pipeline is None:
-            st.warning("Build an index first (go to the **📥 Ingestion** tab).")
-        elif not _query_input or not _query_input.strip():
-            st.warning("Enter a non-empty query.")
-        else:
-            _safety = check_prompt_safety(_query_input)
-            if _safety.is_suspicious:
-                st.warning(
-                    f"⚠️ {_safety.warning}  \n"
-                    f"Matched: {', '.join(_safety.matched_patterns)}"
+                st.markdown(
+                    f"<div style='display:inline-block; padding:4px 12px; border-radius:4px; "
+                    f"background:{risk_color}; color:white; font-weight:bold; margin:4px 0;'>"
+                    f"Risk Score: {r['risk_score']}/100 — {r['risk_level']}</div>",
+                    unsafe_allow_html=True,
                 )
-            with st.spinner("Retrieving…"):
-                try:
-                    _chunks = st.session_state.pipeline.query(
-                        _query_input.strip(), top_k
-                    )
-                    st.session_state.last_retrieval_results = _chunks
-                except ValidationError as exc:
-                    st.error(f"Validation error: {exc}")
-                except RAGLabError as exc:
-                    st.error(f"Retrieval error: {exc}")
-                except Exception as exc:
-                    st.error(f"Unexpected error: {exc}")
-                    METRICS.record_error(str(exc))
+                st.markdown(f"**Gate Decision:** {gate_icon} {r['gate_decision']}")
 
-    _ret_results = st.session_state.last_retrieval_results
-    if _ret_results:
-        st.success(f"Retrieved **{len(_ret_results)}** chunk(s).")
-        for _chunk in _ret_results:
-            _rank = _chunk.rank or "—"
-            _score_str = f"{_chunk.score:.4f}" if _chunk.score is not None else "—"
-            _src = _chunk.metadata.get("file_name") or _chunk.metadata.get("source", "")
-            _hdr = f"Rank {_rank}  |  Score: {_score_str}  |  Doc: {_chunk.doc_id}"
-            if _src:
-                _hdr += f"  |  {os.path.basename(str(_src))}"
-            with st.expander(_hdr, expanded=(_chunk.rank == 1)):
-                st.caption(f"Chunk ID: `{_chunk.chunk_id}`")
-                st.write(_chunk.text)
-    elif _run_retrieval and st.session_state.index_built:
-        st.info("No results returned for this query.")
-    elif not st.session_state.index_built:
-        st.info("Build an index first, then enter a query here.")
+                if r["findings"]:
+                    st.markdown("**Findings:**")
+                    for finding in r["findings"]:
+                        st.markdown(f"- ⚠️ {finding}")
+                else:
+                    st.success("No findings — task passes all risk rules.")
+
+                if r["recommendations"]:
+                    st.markdown("**Recommendations:**")
+                    for rec in r["recommendations"]:
+                        st.markdown(f"- 💡 {rec}")
+
+                tags = task.get("tags") or []
+                if tags:
+                    st.markdown(f"**Tags:** {', '.join(f'`{t}`' for t in tags)}")
+                deps = task.get("dependencies") or []
+                if deps:
+                    st.markdown(f"**Dependencies:** {', '.join(deps)}")
+                if task.get("due_date"):
+                    st.markdown(f"**Due Date:** {task['due_date']}")
+
 
 # ─────────────────────────────────────────────────────────────────────────
-# Tab 3 — Evaluation
+# Tab 2 — Task Detail
 # ─────────────────────────────────────────────────────────────────────────
 
-with tab_eval:
-    st.subheader("Retrieval Evaluation")
-    st.caption(
-        "Score retrieval quality against the ground-truth question set using "
-        "Recall@K, Precision@K, MRR, and nDCG@K."
+with tab_detail:
+    st.subheader("Task Detail View")
+    task_ids = [r["task_id"] for r in reports]
+    task_labels = [f"{r['task_id']} — {r['title'][:60]}" for r in reports]
+    selected_label = st.selectbox("Select a task", task_labels, index=0)
+    selected_idx = task_labels.index(selected_label)
+    selected_report = reports[selected_idx]
+    selected_task = selected_report["task_obj"]
+
+    risk_color = RISK_COLORS.get(selected_report["risk_level"], "#6c757d")
+    gate_icon = GATE_ICONS.get(selected_report["gate_decision"], "❓")
+
+    st.markdown(f"### {selected_report['task_id']}: {selected_report['title']}")
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Sprint", selected_report["sprint"])
+    c2.metric("Status", selected_report["status"])
+    c3.metric("Priority", selected_task.get("priority", "").upper())
+    c4.metric("Assignee", selected_report["assignee"])
+
+    st.markdown("---")
+
+    rc1, rc2, rc3 = st.columns(3)
+    rc1.markdown(
+        f"<div style='padding:8px 16px; border-radius:6px; background:{risk_color}; "
+        f"color:white; font-weight:bold; text-align:center;'>"
+        f"Risk Score: {selected_report['risk_score']}/100<br>{selected_report['risk_level']}</div>",
+        unsafe_allow_html=True,
     )
+    rc2.markdown(f"**Gate Decision:**  \n{gate_icon} {selected_report['gate_decision']}")
+    rc3.markdown(f"**Rules Triggered:**  \n{', '.join(selected_report['triggered_rules']) or 'None'}")
 
-    _gt_path = os.path.join(settings.data_dir, "ground_truth", "questions.json")
-    _ground_truth = None
+    st.markdown("---")
+    st.markdown("#### Task Description")
+    st.write(selected_task.get("description") or "_No description provided._")
 
-    try:
-        from src.evaluation.ground_truth_loader import load_ground_truth
-        _ground_truth = load_ground_truth(_gt_path)
-        st.info(
-            f"📋 Loaded **{len(_ground_truth)}** ground-truth questions "
-            f"from `{_gt_path}`."
-        )
-    except EvaluationError as exc:
-        st.error(f"Could not load ground truth: {exc}")
-    except Exception as exc:
-        st.error(f"Unexpected error loading ground truth: {exc}")
+    st.markdown("#### Acceptance Criteria")
+    ac = selected_task.get("acceptance_criteria")
+    if ac:
+        st.write(ac)
+    else:
+        st.warning("No acceptance criteria defined.")
 
-    _run_eval = st.button("📊 Run Evaluation", type="primary", key="btn_run_eval")
-
-    if _run_eval:
-        if not st.session_state.index_built or st.session_state.pipeline is None:
-            st.warning("Build an index first (go to the **📥 Ingestion** tab).")
-        elif _ground_truth is None:
-            st.error("Ground truth could not be loaded — cannot evaluate.")
+    col_sec, col_arch, col_qa = st.columns(3)
+    with col_sec:
+        st.markdown("**Security Notes**")
+        sn = selected_task.get("security_notes")
+        if sn:
+            st.info(sn)
         else:
-            with st.spinner("Running evaluation…"):
-                try:
-                    from src.evaluation.evaluator import RetrievalEvaluator
-                    _evaluator = RetrievalEvaluator(st.session_state.pipeline)
-                    _eval_results, _eval_summary = _evaluator.evaluate(
-                        _ground_truth, top_k=top_k
-                    )
-                    _csv_path = os.path.join(
-                        settings.results_dir, "evaluation_results.csv"
-                    )
-                    _evaluator.save_results_csv(_eval_results, path=_csv_path)
-                    st.session_state.last_evaluation_results = _eval_results
-                    st.session_state.last_evaluation_summary = _eval_summary
-                    st.toast("Evaluation complete.", icon="📊")
-                except EvaluationError as exc:
-                    st.error(f"Evaluation error: {exc}")
-                except RAGLabError as exc:
-                    st.error(f"Pipeline error: {exc}")
-                except Exception as exc:
-                    st.error(f"Unexpected error: {exc}")
-                    METRICS.record_error(str(exc))
+            st.warning("None")
+    with col_arch:
+        st.markdown("**Architecture Notes**")
+        an = selected_task.get("architecture_notes")
+        if an:
+            st.info(an)
+        else:
+            st.warning("None")
+    with col_qa:
+        st.markdown("**QA Notes**")
+        qn = selected_task.get("qa_notes")
+        if qn:
+            st.info(qn)
+        else:
+            st.warning("None")
 
-    _eval_summary = st.session_state.last_evaluation_summary
-    _eval_results = st.session_state.last_evaluation_results
+    st.markdown("---")
+    st.markdown("#### Findings & Recommendations")
+    if selected_report["findings"]:
+        for i, (finding, rec) in enumerate(zip(selected_report["findings"], selected_report["recommendations"]), 1):
+            st.markdown(f"**{i}. Finding:** ⚠️ {finding}")
+            st.markdown(f"   **Recommendation:** 💡 {rec}")
+            st.markdown("---")
+    else:
+        st.success("No findings. This task passes all risk checks.")
 
-    if _eval_summary:
-        st.success("Evaluation complete.")
-        st.subheader("Summary Metrics")
-        _em1, _em2, _em3, _em4 = st.columns(4)
-        _em1.metric("Recall@K", f"{_eval_summary.get('avg_recall_at_k', 0):.4f}")
-        _em2.metric("Precision@K", f"{_eval_summary.get('avg_precision_at_k', 0):.4f}")
-        _em3.metric("MRR", f"{_eval_summary.get('avg_mrr', 0):.4f}")
-        _em4.metric("nDCG@K", f"{_eval_summary.get('avg_ndcg_at_k', 0):.4f}")
-        _eqa, _eqb = st.columns(2)
-        _eqa.metric("Questions", _eval_summary.get("total_questions", 0))
-        _eqb.metric("Errors", _eval_summary.get("error_count", 0))
+    tags = selected_task.get("tags") or []
+    if tags:
+        st.markdown(f"**Tags:** {', '.join(f'`{t}`' for t in tags)}")
+    deps = selected_task.get("dependencies") or []
+    if deps:
+        st.markdown(f"**Dependencies:** {', '.join(deps)}")
+    if selected_task.get("due_date"):
+        st.markdown(f"**Due Date:** {selected_task['due_date']}")
+    st.markdown(f"**DoD Status:** {selected_task.get('definition_of_done_status', 'unknown')}")
 
-    if _eval_results:
-        st.subheader("Per-Question Results")
-        try:
-            import pandas as pd
-            _df = pd.DataFrame([
-                {
-                    "Question": r["question"][:65] + ("…" if len(r["question"]) > 65 else ""),
-                    "Recall@K":    round(r["recall_at_k"], 4),
-                    "Precision@K": round(r["precision_at_k"], 4),
-                    "MRR":         round(r["mrr"], 4),
-                    "nDCG@K":      round(r["ndcg_at_k"], 4),
-                    "Error":       r.get("error") or "",
-                }
-                for r in _eval_results
-            ])
-            st.dataframe(_df, use_container_width=True)
-        except ImportError:
-            for _r in _eval_results:
-                st.write(
-                    f"- {_r['question'][:65]}: "
-                    f"recall={_r['recall_at_k']:.4f}, mrr={_r['mrr']:.4f}"
-                )
-
-        _csv_path = os.path.join(settings.results_dir, "evaluation_results.csv")
-        if os.path.exists(_csv_path):
-            with open(_csv_path, "rb") as _f:
-                st.download_button(
-                    label="⬇️ Download Results CSV",
-                    data=_f,
-                    file_name="evaluation_results.csv",
-                    mime="text/csv",
-                    key="btn_dl_csv",
-                )
-
-    elif not _run_eval:
-        st.info(
-            "Click **📊 Run Evaluation** to score retrieval quality against "
-            "the ground-truth questions."
-        )
 
 # ─────────────────────────────────────────────────────────────────────────
-# Tab 4 — System Status
+# Tab 3 — Compliance View
 # ─────────────────────────────────────────────────────────────────────────
 
-with tab_status:
-    st.subheader("System Status")
+with tab_compliance:
+    st.subheader("Compliance Gap Analysis")
+    st.caption("Tasks flagged against GDPR, PCI-DSS, HIPAA, SOX, and general security compliance frameworks.")
 
-    _sc1, _sc2 = st.columns(2)
+    compliance_rows = []
+    for r in reports:
+        comp_results = check_compliance(r["task_obj"])
+        for cr in comp_results:
+            compliance_rows.append({
+                "task_id": r["task_id"],
+                "title": r["title"][:55],
+                "framework": cr.framework,
+                "has_evidence": cr.has_evidence,
+                "gap": cr.gap_description or "Evidence found",
+                "action": cr.action_required or "No action required",
+            })
 
-    with _sc1:
-        st.subheader("Active Configuration")
-        st.metric("Embedding Provider", provider_name)
-        _model_display = model_name if len(model_name) <= 38 else model_name[:35] + "…"
-        st.metric("Embedding Model", _model_display)
-        st.metric("Vector Store", store_name)
-        st.metric("Chunking Strategy", chunk_strategy)
-        st.metric("Chunk Size", chunk_size)
-        st.metric("Chunk Overlap", chunk_overlap)
-        st.metric("Top-K", top_k)
-        st.metric("Mock Mode", "ON" if mock_mode else "OFF")
-        st.metric("Reranker", "ON (PassThrough)" if use_reranker else "OFF")
-        st.metric("PII Redaction", "ON" if redact_pii else "OFF")
+    if not compliance_rows:
+        st.success("No compliance-flagged tasks found.")
+    else:
+        frameworks = sorted({row["framework"] for row in compliance_rows})
+        selected_fw = st.multiselect("Filter by framework", frameworks, default=frameworks)
+        show_gaps_only = st.checkbox("Show gaps only (missing evidence)", value=True)
 
-    with _sc2:
-        st.subheader("Pipeline State")
-        _idx_label = "✅ READY" if st.session_state.index_built else "⏳ NOT BUILT"
-        st.metric("Index Status", _idx_label)
-        if st.session_state.last_build_summary:
-            _bs2 = st.session_state.last_build_summary
-            st.metric("Last Doc ID", _bs2.get("doc_id", "—"))
-            st.metric("Last Chunks", _bs2.get("chunks_created", 0))
+        displayed = [
+            row for row in compliance_rows
+            if row["framework"] in selected_fw
+            and (not show_gaps_only or not row["has_evidence"])
+        ]
 
-        st.subheader("Observability Metrics")
-        _m = METRICS.to_dict()
-        st.metric("Documents Loaded", _m["documents_loaded_total"])
-        st.metric("Chunks Created",   _m["chunks_created_total"])
-        st.metric("Queries Run",      _m["query_count_total"])
-        st.metric("Errors",           _m["error_count_total"])
-        st.metric("Embed Latency (s)",    f"{_m['embedding_latency_seconds']:.4f}")
-        st.metric("Retrieval Latency (s)", f"{_m['retrieval_latency_seconds']:.4f}")
-        st.metric("Rerank Latency (s)",    f"{_m['rerank_latency_seconds']:.4f}")
-        if _m["last_error"]:
-            st.error(f"Last Error: {_m['last_error'][:120]}")
+        if not displayed:
+            st.success("No compliance gaps for selected filters.")
         else:
-            st.caption("No errors recorded.")
+            for row in displayed:
+                status_icon = "✅" if row["has_evidence"] else "❌"
+                with st.expander(
+                    f"{status_icon} {row['task_id']} — {row['title']} | {row['framework']}",
+                    expanded=not row["has_evidence"],
+                ):
+                    st.markdown(f"**Framework:** {row['framework']}")
+                    st.markdown(f"**Evidence status:** {status_icon} {'Evidence found' if row['has_evidence'] else 'MISSING'}")
+                    if not row["has_evidence"]:
+                        st.warning(f"**Gap:** {row['gap']}")
+                        st.info(f"**Required action:** {row['action']}")
 
-    st.divider()
-    st.subheader("Health Check")
-    _health = check_health(settings)
-    _overall_icon = "✅" if _health.healthy else "⚠️"
-    st.write(f"**Overall**: {_overall_icon} {'Healthy' if _health.healthy else 'Degraded'}")
 
-    _hcheck_keys = [k for k in _health.checks]
-    _hcols = st.columns(min(len(_hcheck_keys), 4))
-    for _hi, _hk in enumerate(_hcheck_keys):
-        _icon = "✅" if _health.checks[_hk] else "❌"
-        _hcols[_hi % len(_hcols)].metric(
-            f"{_icon} {_hk}",
-            _health.details.get(_hk, "—"),
-        )
+# ─────────────────────────────────────────────────────────────────────────
+# Tab 4 — About
+# ─────────────────────────────────────────────────────────────────────────
+
+with tab_about:
+    st.subheader("About This Project")
+    st.markdown("""
+**ClickUp — Automated SDLC Risk & Compliance Gatekeeper** is a portfolio demonstration
+of an AI-assisted SDLC quality gate that automatically reviews technical tasks before
+they enter development or review.
+
+---
+
+### What problem does this solve?
+
+In Agile/Scrum engineering teams, tasks often enter development sprints with:
+- Missing or vague acceptance criteria
+- No QA test plan
+- Security-sensitive changes without a threat model
+- AI/LLM features without safety guardrails
+- Architecture-impacting changes without a design review
+- Compliance requirements (GDPR, PCI, HIPAA) without evidence
+
+This tool acts as an **automated first-pass reviewer** that catches these gaps early,
+before they become expensive bugs, security incidents, or compliance violations.
+
+---
+
+### How it works
+
+1. Tasks are loaded from a ClickUp-compatible JSON structure (mock data in this demo)
+2. Each task is analyzed by a deterministic rule-based risk engine (`src/core/risk_reviewer.py`)
+3. 10 SDLC risk rules are applied covering: acceptance criteria, QA, security, AI guardrails, architecture, compliance, due dates, and dependencies
+4. Each task receives a **risk score (0–100)**, **risk level**, **gate decision**, **findings**, and **recommendations**
+5. The dashboard provides a project-wide risk overview and per-task drill-down
+
+---
+
+### Risk Rules
+
+| Rule | What it checks |
+|------|----------------|
+| RULE-001 | Missing or insufficient acceptance criteria |
+| RULE-002 | No QA notes or test plan |
+| RULE-003 | Definition of Done not confirmed |
+| RULE-004 | Security-sensitive task without security notes |
+| RULE-005 | AI/LLM task without guardrails or fallback |
+| RULE-006 | Architecture-impacting task without architecture notes |
+| RULE-007 | Critical priority with vague scope |
+| RULE-008 | Task blocked by unresolved dependency |
+| RULE-009 | Compliance task without evidence |
+| RULE-010 | Due date overdue or at immediate risk |
+
+---
+
+### What is mock data?
+
+All 20 tasks in this demo are realistic but fictional ClickUp tasks. They are stored in
+`data/clickup_demo/tasks.json`. No real ClickUp workspace is connected.
+
+---
+
+### Future ClickUp API integration
+
+The `src/core/clickup_adapter.py` module is designed with clear TODO comments showing
+exactly where real ClickUp API calls would replace the local JSON loading.
+This includes: authentication, task pulling, risk label writing, comment posting, and status updates.
+
+---
+
+### Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| UI | Streamlit |
+| Risk Engine | Python (rule-based, deterministic) |
+| Data | JSON mock data (ClickUp schema) |
+| Tests | pytest |
+| Packaging | Docker, Docker Compose |
+
+---
+
+**Author:** Oren Salami | AI Systems Engineer
+**Purpose:** Portfolio demonstration — SDLC, Agile, Risk Management, QA, Compliance
+    """)

@@ -1,0 +1,46 @@
+{
+  "version": "1.0",
+  "description": "Architecture review guidelines for tasks with system-wide impact.",
+  "review_triggers": [
+    "New database schema or migration",
+    "New microservice or service boundary change",
+    "API gateway configuration change",
+    "Infrastructure or Kubernetes changes",
+    "Third-party service integration",
+    "CI/CD pipeline changes",
+    "Data pipeline or event-driven architecture changes",
+    "Message queue or caching layer changes",
+    "Load balancer or networking changes"
+  ],
+  "required_review_artifacts": [
+    {
+      "artifact": "System context diagram",
+      "description": "Show how the change fits in the broader system"
+    },
+    {
+      "artifact": "Data flow diagram",
+      "description": "Show data in/out, storage, and transformations"
+    },
+    {
+      "artifact": "Backward compatibility statement",
+      "description": "Confirm existing consumers are not broken"
+    },
+    {
+      "artifact": "Rollback plan",
+      "description": "Define how to revert if the change causes issues"
+    },
+    {
+      "artifact": "Performance impact assessment",
+      "description": "Expected latency, throughput, and resource impact"
+    },
+    {
+      "artifact": "Security impact assessment",
+      "description": "New attack surface, data exposure, or privilege changes"
+    }
+  ],
+  "approvers": [
+    "Tech Lead",
+    "Principal Engineer",
+    "DevOps/Platform Lead (for infrastructure changes)"
+  ]
+}

@@ -1,12 +1,8 @@
 services:
-  rag-app:
+  sdlc-gatekeeper:
     build: .
     ports:
-      - "8511:8501"
-    env_file:
-      - .env
+      - "8501:8501"
     volumes:
       - ./data:/app/data
-      - ./vector_db:/app/vector_db
-      - ./results:/app/results
     restart: unless-stopped

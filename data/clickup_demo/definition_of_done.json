@@ -1,0 +1,90 @@
+{
+  "version": "1.2",
+  "description": "Definition of Done checklist that every task must satisfy before marking as complete.",
+  "checklist": [
+    {
+      "id": "DOD-001",
+      "category": "Code Quality",
+      "item": "Code has been peer-reviewed and approved by at least one team member",
+      "required_for": ["all"]
+    },
+    {
+      "id": "DOD-002",
+      "category": "Code Quality",
+      "item": "No critical or high SonarQube/linting issues remaining",
+      "required_for": ["all"]
+    },
+    {
+      "id": "DOD-003",
+      "category": "Testing",
+      "item": "Unit tests written and passing with minimum 80% coverage for new code",
+      "required_for": ["all"]
+    },
+    {
+      "id": "DOD-004",
+      "category": "Testing",
+      "item": "Integration tests passing in CI pipeline",
+      "required_for": ["all"]
+    },
+    {
+      "id": "DOD-005",
+      "category": "Testing",
+      "item": "QA engineer has verified acceptance criteria on staging environment",
+      "required_for": ["all"]
+    },
+    {
+      "id": "DOD-006",
+      "category": "Security",
+      "item": "Security review completed and signed off for security-sensitive tasks",
+      "required_for": ["security", "auth", "payment", "compliance"]
+    },
+    {
+      "id": "DOD-007",
+      "category": "Security",
+      "item": "No secrets, credentials, or API keys committed to source code",
+      "required_for": ["all"]
+    },
+    {
+      "id": "DOD-008",
+      "category": "Architecture",
+      "item": "Architecture review completed for tasks with system-wide impact",
+      "required_for": ["architecture", "database", "infrastructure"]
+    },
+    {
+      "id": "DOD-009",
+      "category": "Documentation",
+      "item": "API documentation updated if endpoints were added or changed",
+      "required_for": ["api", "backend"]
+    },
+    {
+      "id": "DOD-010",
+      "category": "Documentation",
+      "item": "README or runbook updated if deployment or operations changed",
+      "required_for": ["infrastructure", "deployment"]
+    },
+    {
+      "id": "DOD-011",
+      "category": "Deployment",
+      "item": "Feature deployed to staging environment and smoke-tested",
+      "required_for": ["all"]
+    },
+    {
+      "id": "DOD-012",
+      "category": "Deployment",
+      "item": "Rollback plan documented and tested for critical deployments",
+      "required_for": ["critical", "deployment", "infrastructure"]
+    },
+    {
+      "id": "DOD-013",
+      "category": "Compliance",
+      "item": "Compliance evidence attached for GDPR, PCI, HIPAA, or SOX tasks",
+      "required_for": ["gdpr", "pci", "hipaa", "sox", "compliance"]
+    },
+    {
+      "id": "DOD-014",
+      "category": "AI/ML",
+      "item": "AI guardrails, fallback behavior, and safety controls documented and tested",
+      "required_for": ["ai", "llm", "ml"]
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "risk_thresholds": {
+    "Low": { "min": 0, "max": 25 },
+    "Medium": { "min": 26, "max": 50 },
+    "High": { "min": 51, "max": 75 },
+    "Critical": { "min": 76, "max": 100 }
+  },
+  "gate_decisions": {
+    "Approved for Development": "Task meets all quality gates. Ready to enter development sprint.",
+    "Needs Clarification": "Task has minor gaps that must be resolved before development begins.",
+    "Requires QA Review": "Task lacks sufficient test plan or QA definition. QA lead must review.",
+    "Requires Security Review": "Task has security or compliance concerns. Security team must sign off.",
+    "Requires Architecture Review": "Task has architectural impact. Tech lead or architect must review.",
+    "Blocked": "Task cannot proceed. Blocking dependency or critical gap must be resolved first."
+  },
+  "mandatory_fields": [
+    "task_id",
+    "title",
+    "description",
+    "status",
+    "priority",
+    "assignee",
+    "sprint"
+  ],
+  "quality_gates": {
+    "acceptance_criteria_min_words": 8,
+    "qa_notes_min_words": 5,
+    "security_notes_min_words_for_security_tasks": 5,
+    "architecture_notes_min_words_for_arch_tasks": 8,
+    "critical_scope_min_words": 20
+  },
+  "version": "1.0",
+  "last_updated": "2026-06-01"
+}
