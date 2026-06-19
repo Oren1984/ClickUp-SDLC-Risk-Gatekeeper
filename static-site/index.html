@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SDLC Risk &amp; Compliance Gatekeeper — Oren Salami</title>
-  <meta name="description" content="AI-assisted SDLC risk review for technical tasks, QA readiness, security review, compliance gaps, and Definition of Done validation. ClickUp-style workflow demo." />
+  <title>ClickUp SDLC Risk Gatekeeper — Oren Salami</title>
+  <meta name="description" content="AI-assisted SDLC Risk &amp; Compliance Gatekeeper for ClickUp-style software delivery workflows. Reviews tasks for QA readiness, security, compliance gaps, and Definition of Done alignment." />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -12,13 +12,15 @@
 <!-- ── Navigation ──────────────────────────────────────────────────── -->
 <nav>
   <div class="nav-inner">
-    <span class="nav-brand">SDLC Risk &amp; Compliance Gatekeeper</span>
+    <span class="nav-brand">ClickUp SDLC Risk Gatekeeper</span>
     <ul class="nav-links">
       <li><a href="#problem">Problem</a></li>
       <li><a href="#solution">Solution</a></li>
       <li><a href="#flows">Flows</a></li>
       <li><a href="#architecture">Architecture</a></li>
       <li><a href="#demo">Demo</a></li>
+      <li><a href="#governance">Governance</a></li>
+      <li><a href="#api-readiness">API</a></li>
       <li><a href="#run">Run</a></li>
     </ul>
   </div>
@@ -28,14 +30,14 @@
 <section class="hero">
   <div class="container">
     <div class="hero-badge">Technology Project Management + AI Tools</div>
-    <h1>SDLC Risk &amp; Compliance Gatekeeper</h1>
+    <h1>ClickUp SDLC Risk Gatekeeper</h1>
     <p class="hero-byline">Oren Salami &nbsp;|&nbsp; Technology Project Management + AI Tools</p>
     <p class="hero-pitch">
       AI-assisted SDLC risk review for technical tasks, user stories, QA readiness,
       Definition of Done validation, security review, architecture review, and compliance
       gaps — before work enters development.
     </p>
-    <p class="hero-sub">ClickUp-style workflow demo — SDLC risk gate for technical project management</p>
+    <p class="hero-sub">AI-assisted SDLC Risk &amp; Compliance Gatekeeper for ClickUp-style software delivery workflows &mdash; not a chatbot, not a ClickUp clone, a governance gate.</p>
     <a href="#run" class="btn btn-primary">Run the Demo</a>
     <a href="#flows" class="btn btn-outline">See Core Flows</a>
     <p class="hero-meta">
@@ -108,7 +110,7 @@
     <p class="section-label">The Solution</p>
     <h2 class="section-title">An automated SDLC gate before development starts</h2>
     <p class="section-intro">
-      The SDLC Risk &amp; Compliance Gatekeeper reviews each task against 10 deterministic
+      The ClickUp SDLC Risk Gatekeeper reviews each task against 10 deterministic
       rules and returns a structured assessment. Every task gets a risk score, a gate
       decision, and practical recommendations before a developer touches it.
     </p>
@@ -557,13 +559,134 @@
   </div>
 </section>
 
+<!-- ── Governance & HITL ─────────────────────────────────────────── -->
+<section id="governance">
+  <div class="container">
+    <p class="section-label">AI Governance</p>
+    <h2 class="section-title">Human-in-the-Loop by design</h2>
+    <p class="section-intro">
+      The gatekeeper is a decision-support tool — not an autonomous decision-maker.
+      AI recommendations are advisory. Final gate decisions are always owned by a human reviewer.
+    </p>
+
+    <div class="solution-grid">
+      <div class="solution-card">
+        <span class="score" style="font-size:1rem; color:var(--blue);">Advisory</span>
+        <div class="label">AI Role</div>
+        <p>AI generates risk scores, findings, and recommendations. Humans make all final calls.</p>
+      </div>
+      <div class="solution-card">
+        <span class="score" style="font-size:1rem; color:#16a34a;">Explainable</span>
+        <div class="label">Transparency</div>
+        <p>Every finding states exactly which rule triggered, what is missing, and why it matters.</p>
+      </div>
+      <div class="solution-card">
+        <span class="score" style="font-size:1rem; color:#d97706;">Flags Gaps</span>
+        <div class="label">Uncertainty</div>
+        <p>Missing data is always reported as a risk signal — the system never assumes compliance.</p>
+      </div>
+      <div class="solution-card">
+        <span class="score" style="font-size:1rem; color:#dc2626;">No Auto-Block</span>
+        <div class="label">Human Control</div>
+        <p>No task is automatically blocked or approved. Human review always precedes any gate outcome.</p>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:40px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Responsibility in HITL Workflow</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>AI System</strong></td><td>Generates risk assessment, findings, and recommended actions</td></tr>
+          <tr><td><strong>PM</strong></td><td>Reviews findings, drives clarification, owns sprint readiness decision</td></tr>
+          <tr><td><strong>QA Lead</strong></td><td>Validates QA readiness, reviews QA-flagged tasks, confirms test plan</td></tr>
+          <tr><td><strong>Tech Lead / Architect</strong></td><td>Reviews architecture-flagged tasks, confirms design decisions</td></tr>
+          <tr><td><strong>Security / Compliance</strong></td><td>Signs off on security, AI safety, and compliance-flagged tasks</td></tr>
+          <tr><td><strong>Task Owner</strong></td><td>Updates task fields to resolve findings after review</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:20px; font-size:.88rem; color:var(--text-muted);">
+      See <code>docs/AI_GOVERNANCE_AND_RISK_PRINCIPLES.md</code> and
+      <code>docs/HUMAN_IN_THE_LOOP_WORKFLOW.md</code> for the full governance framework.
+    </p>
+  </div>
+</section>
+
+<!-- ── Future API Readiness ──────────────────────────────────────── -->
+<section id="api-readiness">
+  <div class="container">
+    <p class="section-label">Future Integration</p>
+    <h2 class="section-title">ClickUp API ready — when you need it</h2>
+    <p class="section-intro">
+      The ClickUp API integration is intentionally not active in this version.
+      The project is demo-first. The integration boundary is designed, documented,
+      and future-ready — activation requires only implementing the prepared adapter.
+    </p>
+
+    <div class="arch-block">
+      <pre><span class="dim">── Integration Layer (future-ready skeleton) ────────────────────────</span>
+
+<span class="hl">src/integrations/base.py</span>              <span class="dim">← TaskClient protocol (interface)</span>
+<span class="hl">src/integrations/mock_client.py</span>       <span class="ok">← active mock (reads local JSON)</span>
+<span class="hl">src/integrations/clickup_api_client.py</span> <span class="dim">← placeholder (NotImplementedError)</span>
+             │
+             ▼
+<span class="dim">── When activated, will fetch from ClickUp v2 API ──────────────────</span>
+
+<span class="hl">GET /api/v2/list/{list_id}/task</span>       <span class="dim">← pull tasks from workspace</span>
+<span class="hl">POST /api/v2/task/{task_id}/comment</span>   <span class="dim">← post review findings (human-approved)</span>
+<span class="hl">POST /api/v2/task/{task_id}/tag/risk-X</span> <span class="dim">← apply risk label</span></pre>
+    </div>
+
+    <div class="table-wrap" style="margin-top:32px;">
+      <table>
+        <thead>
+          <tr>
+            <th>What stays the same</th>
+            <th>What changes when activated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Risk engine, rules, scoring, gate logic</td>
+            <td>Data source: JSON file → live ClickUp API</td>
+          </tr>
+          <tr>
+            <td>Streamlit dashboard and UI</td>
+            <td>Adapter: MockTaskClient → ClickUpApiClient</td>
+          </tr>
+          <tr>
+            <td>Compliance checks and report generator</td>
+            <td>Authentication: add CLICKUP_API_TOKEN env var</td>
+          </tr>
+          <tr>
+            <td>All tests except integration tests</td>
+            <td>Optional write-back: comment, label, status updates</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:20px; font-size:.88rem; color:var(--text-muted);">
+      See <code>docs/FUTURE_CLICKUP_API_READINESS.md</code> for the full integration roadmap.
+      No tokens are committed. No credentials are required to run the demo.
+    </p>
+  </div>
+</section>
+
 <!-- ── Footer ──────────────────────────────────────────────────────── -->
 <footer>
   <div class="container">
-    <p><strong>SDLC Risk &amp; Compliance Gatekeeper</strong></p>
+    <p><strong>ClickUp SDLC Risk Gatekeeper</strong></p>
     <p>Oren Salami &nbsp;|&nbsp; Technology Project Management + AI Tools</p>
     <p style="margin-top:12px; font-size:.78rem;">
-      ClickUp-style workflow demo &nbsp;·&nbsp;
+      Demo mode &nbsp;·&nbsp;
       Local mock data &nbsp;·&nbsp;
       No API keys required &nbsp;·&nbsp;
       MIT License

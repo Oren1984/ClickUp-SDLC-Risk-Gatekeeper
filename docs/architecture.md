@@ -1,4 +1,4 @@
-# Architecture — SDLC Risk & Compliance Gatekeeper
+# Architecture — ClickUp SDLC Risk Gatekeeper
 
 **Oren Salami | Technology Project Management + AI Tools**
 

@@ -1,4 +1,4 @@
-# Project Overview: SDLC Risk & Compliance Gatekeeper
+# Project Overview: ClickUp SDLC Risk Gatekeeper
 
 **Oren Salami | Technology Project Management + AI Tools**
 

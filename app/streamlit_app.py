@@ -1,4 +1,4 @@
-"""SDLC Risk & Compliance Gatekeeper — Streamlit Dashboard"""
+"""ClickUp SDLC Risk Gatekeeper — Streamlit Dashboard"""
 from __future__ import annotations
 import os
 import sys
@@ -11,7 +11,7 @@ if _ROOT not in sys.path:
 import streamlit as st
 
 st.set_page_config(
-    page_title="SDLC Risk Gatekeeper",
+    page_title="ClickUp SDLC Risk Gatekeeper",
     layout="wide",
     initial_sidebar_state="expanded",
     page_icon="🛡️",
@@ -70,13 +70,14 @@ st.markdown(
     """
     <div style="padding:0.6rem 0 0.4rem; border-bottom:2px solid #e0e6ed; margin-bottom:0.8rem;">
         <h1 style="margin:0; font-size:1.8rem; line-height:1.25;">
-            🛡️ SDLC Risk &amp; Compliance Gatekeeper
+            🛡️ ClickUp SDLC Risk Gatekeeper
         </h1>
         <p style="margin:0.25rem 0 0; font-size:0.95rem; color:#444;">
             <strong>Oren Salami</strong> | Technology Project Management + AI Tools
         </p>
         <p style="margin:0.1rem 0 0; color:#888; font-size:0.82rem;">
-            ClickUp-style workflow demo &mdash; SDLC risk gate for technical project management
+            AI-assisted SDLC risk &amp; compliance review for ClickUp-style software delivery workflows
+            &nbsp;&mdash;&nbsp; <strong>Demo mode</strong>: all data is local mock JSON, no credentials required
         </p>
     </div>
     """,
@@ -115,8 +116,8 @@ with st.sidebar:
     selected_gates = st.multiselect("Gate Decision", all_gates, default=all_gates)
 
     st.divider()
-    st.caption("This demo uses local ClickUp-style mock data. No real API calls are made.")
-    st.caption("See `src/core/clickup_adapter.py` for ClickUp integration TODOs and future tool support.")
+    st.caption("Demo mode — all data is local mock JSON. No API keys or credentials required.")
+    st.caption("See `src/integrations/clickup_api_client.py` for the future-ready API skeleton and `docs/FUTURE_CLICKUP_API_READINESS.md` for the integration plan.")
 
 
 # ── Filter reports ────────────────────────────────────────────────────────
@@ -342,10 +343,13 @@ with tab_compliance:
 with tab_about:
     st.subheader("About This Project")
     st.markdown("""
-**SDLC Risk & Compliance Gatekeeper** is a portfolio demonstration of an AI-assisted
-SDLC quality gate that automatically reviews technical tasks before they enter
-development or review. The current demo uses a ClickUp-style workflow as its
-first integration example.
+**ClickUp SDLC Risk Gatekeeper** is a portfolio demonstration of an AI-assisted
+governance and risk-review tool for ClickUp-style software delivery workflows.
+It reviews tasks, user stories, and sprint items for delivery risk, QA readiness,
+acceptance criteria quality, security and compliance gaps, and Definition of Done alignment —
+before work enters development.
+
+This is not a generic chatbot and not a ClickUp clone. It is a structured SDLC risk gate.
 
 ---
 
@@ -398,15 +402,24 @@ stored in `data/clickup_demo/tasks.json`. No real workspace is connected.
 
 ---
 
-### Integration & Future Support
+### AI Governance & Human-in-the-Loop
 
-The `src/core/clickup_adapter.py` module is the first supported integration adapter.
-It currently loads local JSON, but is designed so real API calls can replace it.
+The gatekeeper is a **decision-support tool**, not an autonomous decision-maker.
 
-The adapter-based architecture means the same risk engine can later connect to:
-**ClickUp**, Jira, Monday, Linear, Azure DevOps, Notion, or any tool with a task API.
+- AI recommendations are **advisory** — PMs, QA leads, and Tech Leads make all final decisions
+- Every finding is **explainable** — each rule states exactly what is missing and why it matters
+- **No task is automatically blocked or approved** without human review
+- See `docs/AI_GOVERNANCE_AND_RISK_PRINCIPLES.md` and `docs/HUMAN_IN_THE_LOOP_WORKFLOW.md`
 
-See `docs/future_clickup_integration.md` for the ClickUp integration step-by-step guide.
+### Future ClickUp API Readiness
+
+The ClickUp API integration is **intentionally not active** in this version. The project is demo-first.
+
+- `src/integrations/clickup_api_client.py` is a future-ready placeholder (raises `NotImplementedError`)
+- `src/integrations/mock_client.py` is the active adapter using local JSON
+- `src/integrations/base.py` defines the `TaskClient` protocol all adapters must satisfy
+- Real integration requires only implementing the adapter — the risk engine stays unchanged
+- See `docs/FUTURE_CLICKUP_API_READINESS.md` for the integration roadmap
 
 ---
 

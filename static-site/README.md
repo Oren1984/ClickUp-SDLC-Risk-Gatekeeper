@@ -1,7 +1,7 @@
 # Static Portfolio Site
 
 This folder contains a standalone static presentation page for the
-SDLC Risk & Compliance Gatekeeper project.
+ClickUp SDLC Risk Gatekeeper project.
 
 It is designed for portfolio, recruiter, and course presentation use,
 and is intentionally separate from the Streamlit demo app.
