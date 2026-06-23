@@ -618,63 +618,71 @@
   </div>
 </section>
 
-<!-- ── Future API Readiness ──────────────────────────────────────── -->
+<!-- ── API Integration ───────────────────────────────────────────── -->
 <section id="api-readiness">
   <div class="container">
-    <p class="section-label">Future Integration</p>
-    <h2 class="section-title">ClickUp API ready — when you need it</h2>
+    <p class="section-label">ClickUp API Integration</p>
+    <h2 class="section-title">Phase 1: Read-Only API Integration</h2>
     <p class="section-intro">
-      The ClickUp API integration is intentionally not active in this version.
-      The project is demo-first. The integration boundary is designed, documented,
-      and future-ready — activation requires only implementing the prepared adapter.
+      The project runs in mock/demo mode by default — no credentials required.
+      Phase 1 adds an optional read-only ClickUp API client that activates
+      when <code>CLICKUP_API_TOKEN</code> is set in the environment.
+      No secrets are committed. Mock fallback is always preserved.
     </p>
 
     <div class="arch-block">
-      <pre><span class="dim">── Integration Layer (future-ready skeleton) ────────────────────────</span>
+      <pre><span class="dim">── Integration Layer ────────────────────────────────────────────────</span>
 
 <span class="hl">src/integrations/base.py</span>              <span class="dim">← TaskClient protocol (interface)</span>
-<span class="hl">src/integrations/mock_client.py</span>       <span class="ok">← active mock (reads local JSON)</span>
-<span class="hl">src/integrations/clickup_api_client.py</span> <span class="dim">← placeholder (NotImplementedError)</span>
+<span class="hl">src/integrations/mock_client.py</span>       <span class="ok">← default: reads local JSON (no credentials)</span>
+<span class="hl">src/integrations/clickup_api_client.py</span> <span class="ok">← Phase 1: read-only API client (active)</span>
              │
              ▼
-<span class="dim">── When activated, will fetch from ClickUp v2 API ──────────────────</span>
+<span class="dim">── Read-only endpoints (Phase 1, active) ───────────────────────────</span>
 
-<span class="hl">GET /api/v2/list/{list_id}/task</span>       <span class="dim">← pull tasks from workspace</span>
-<span class="hl">POST /api/v2/task/{task_id}/comment</span>   <span class="dim">← post review findings (human-approved)</span>
-<span class="hl">POST /api/v2/task/{task_id}/tag/risk-X</span> <span class="dim">← apply risk label</span></pre>
+<span class="hl">GET /api/v2/team/{team_id}/space</span>       <span class="ok">← list spaces in workspace</span>
+<span class="hl">GET /api/v2/space/{space_id}/folder</span>    <span class="ok">← list folders</span>
+<span class="hl">GET /api/v2/folder/{folder_id}/list</span>    <span class="ok">← list lists</span>
+<span class="hl">GET /api/v2/list/{list_id}/task</span>        <span class="ok">← fetch tasks</span>
+             │
+             ▼
+<span class="dim">── Write-back endpoints (Phase 2, future only) ─────────────────────</span>
+
+<span class="hl">POST /api/v2/task/{task_id}/comment</span>    <span class="dim">← post review findings (HITL, future)</span>
+<span class="hl">POST /api/v2/task/{task_id}/tag/risk-X</span> <span class="dim">← apply risk label (HITL, future)</span></pre>
     </div>
 
     <div class="table-wrap" style="margin-top:32px;">
       <table>
         <thead>
           <tr>
-            <th>What stays the same</th>
-            <th>What changes when activated</th>
+            <th>Phase 1 (active)</th>
+            <th>Phase 2 (future — HITL write-back)</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Risk engine, rules, scoring, gate logic</td>
-            <td>Data source: JSON file → live ClickUp API</td>
+            <td>Read tasks from ClickUp lists via GET</td>
+            <td>Post AI review findings as task comments</td>
           </tr>
           <tr>
-            <td>Streamlit dashboard and UI</td>
-            <td>Adapter: MockTaskClient → ClickUpApiClient</td>
+            <td>Token from environment only, never printed</td>
+            <td>Apply risk-level tags after human approval</td>
           </tr>
           <tr>
-            <td>Compliance checks and report generator</td>
-            <td>Authentication: add CLICKUP_API_TOKEN env var</td>
+            <td>Mock fallback when token is absent</td>
+            <td>Update task status after HITL gate decision</td>
           </tr>
           <tr>
-            <td>All tests except integration tests</td>
-            <td>Optional write-back: comment, label, status updates</td>
+            <td>No write operations of any kind</td>
+            <td>All writes require explicit human approval first</td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <p style="margin-top:20px; font-size:.88rem; color:var(--text-muted);">
-      See <code>docs/FUTURE_CLICKUP_API_READINESS.md</code> for the full integration roadmap.
+      See <code>docs/future_clickup_integration.md</code> for setup instructions and the Phase 2 plan.
       No tokens are committed. No credentials are required to run the demo.
     </p>
   </div>

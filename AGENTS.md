@@ -26,10 +26,11 @@ This document defines how AI coding agents and human contributors should work in
 
 ### ClickUp API
 
-- Do **not** make real ClickUp API calls in any code path that runs by default
-- Do **not** activate `clickup_api_client.py` — it must remain a placeholder that raises `NotImplementedError`
+- `clickup_api_client.py` is a **read-only** client (Phase 1 complete). It fetches tasks via GET endpoints only.
+- Do **not** implement write-back (comments, labels, status updates) — those are Phase 2 (HITL) only
 - Do **not** add `CLICKUP_API_TOKEN` or any real token to committed files
-- Do **not** require real ClickUp credentials to run the app or tests
+- Do **not** require real ClickUp credentials to run the app or tests — mock fallback must always work
+- The token must never appear in logs, error messages, repr/str output, docs, or test output
 
 ### Secrets and credentials
 
@@ -69,7 +70,7 @@ This document defines how AI coding agents and human contributors should work in
 ## Default Behavior Rules
 
 1. **Mock data is the default.** All demo runs must work without credentials.
-2. **Future-ready means placeholder only.** `clickup_api_client.py` raises `NotImplementedError`. Do not implement real API calls.
+2. **Read-only only.** `clickup_api_client.py` fetches via GET endpoints only. Write ops raise `NotImplementedError`. Do not implement write-back.
 3. **Tests must pass.** Run `pytest` before submitting any change.
 4. **Portfolio clarity is a requirement.** Code should be readable by a reviewer without deep Python expertise.
 5. **No unnecessary comments.** Only add a comment when the WHY is non-obvious — a hidden constraint, a workaround, a subtle invariant.
@@ -84,7 +85,7 @@ If you need to support a new project management tool (Jira, Linear, Notion, etc.
 2. Implement the `TaskClient` protocol defined in `src/integrations/base.py`
 3. Methods that require real API credentials must raise `NotImplementedError` until integration is explicitly activated
 4. Add tests in `tests/test_integrations.py`
-5. Document the integration boundary in `docs/FUTURE_CLICKUP_API_READINESS.md`
+5. Document the integration boundary in `docs/future_clickup_integration.md`
 6. Do **not** change the default data source in `app/streamlit_app.py`
 
 ---

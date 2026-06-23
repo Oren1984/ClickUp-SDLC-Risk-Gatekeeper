@@ -78,17 +78,48 @@ See [docs/AI_GOVERNANCE_AND_RISK_PRINCIPLES.md](docs/AI_GOVERNANCE_AND_RISK_PRIN
 
 ---
 
-## Future ClickUp API Readiness
+## Optional ClickUp Read-Only API Integration
 
-The ClickUp API integration is **intentionally not active** in this version. The project is demo-first by design.
+**Phase 1 (read-only) is implemented.** The project runs in mock/demo mode by default with no credentials required. Supplying a ClickUp API token activates live data fetching.
 
-The integration boundary is prepared:
-- `src/core/clickup_adapter.py` contains documented TODOs and placeholder functions (`post_review_comment`, `set_risk_label`, `update_task_status`) that raise `NotImplementedError`
-- `src/integrations/` contains an adapter protocol (`base.py`), a working mock implementation (`mock_client.py`), and a future-ready API skeleton (`clickup_api_client.py`)
-- Authentication must use environment variables — no tokens committed to code
-- The core risk engine is fully decoupled from the data source
+### How it works
 
-See [docs/FUTURE_CLICKUP_API_READINESS.md](docs/FUTURE_CLICKUP_API_READINESS.md) for the integration roadmap.
+- `src/integrations/clickup_api_client.py` — read-only ClickUp v2 API client
+- When `CLICKUP_API_TOKEN` is set: fetches live tasks from configured lists
+- When unconfigured: `fetch_tasks()` returns `[]` and the app continues with mock data
+- Write operations (`post_review_comment`, `set_risk_label`, `update_task_status`) raise `NotImplementedError` — Phase 2 (HITL write-back) only
+
+### Setup (optional)
+
+1. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+2. Fill in the real values in `.env` (never commit this file):
+   ```
+   CLICKUP_API_TOKEN=your_personal_api_token
+   CLICKUP_TEAM_ID=your_workspace_team_id
+   CLICKUP_SPACE_ID=your_space_id
+   CLICKUP_FOLDER_ID=your_folder_id
+   CLICKUP_LIST_BACKLOG_REQUIREMENTS_ID=...
+   CLICKUP_LIST_SDLC_RISK_REVIEW_ID=...
+   CLICKUP_LIST_QA_DOD_VALIDATION_ID=...
+   CLICKUP_LIST_GOVERNANCE_HITL_ID=...
+   CLICKUP_LIST_DEMO_DASHBOARD_ID=...
+   ```
+3. Verify the connection (safe read-only check, token is never printed):
+   ```bash
+   python scripts/check_clickup_connection.py
+   ```
+
+### Security boundaries
+
+- Token is read from environment only — never hardcoded, never logged, never printed
+- All endpoints used are `GET` (read-only)
+- No write-back of any kind in Phase 1
+- If env vars are missing the app silently uses mock data
+
+See [docs/future_clickup_integration.md](docs/future_clickup_integration.md) for the Phase 2 write-back plan.
 
 ---
 

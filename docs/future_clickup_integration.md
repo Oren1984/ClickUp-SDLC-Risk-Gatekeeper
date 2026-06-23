@@ -1,94 +1,138 @@
-# Future ClickUp API Integration
+# ClickUp API Integration
 
-## Current State
+## Phase 1 — Read-Only Integration (Implemented)
 
-The project runs entirely on local mock data. The `src/core/clickup_adapter.py`
-module loads tasks from `data/clickup_demo/tasks.json`.
+The read-only ClickUp API integration is complete. The project defaults to mock/demo
+data and activates live API fetching when `CLICKUP_API_TOKEN` is present in the
+environment.
 
-## Integration Path
+### Active endpoints (GET only)
 
-### Step 1 — Authentication
-
-```python
-# Add to .env
-CLICKUP_API_TOKEN=pk_xxxxxxxxxxxxxxxx
-
-# In clickup_adapter.py
-import os, requests
-HEADERS = {"Authorization": os.environ["CLICKUP_API_TOKEN"]}
-BASE_URL = "https://api.clickup.com/api/v2"
+```
+GET /api/v2/team/{team_id}/space          ← list spaces in workspace
+GET /api/v2/space/{space_id}/folder       ← list folders in space
+GET /api/v2/folder/{folder_id}/list       ← list lists in folder
+GET /api/v2/list/{list_id}/task           ← fetch tasks from a list
+GET /api/v2/task/{task_id}                ← fetch a single task
 ```
 
-### Step 2 — Pull Tasks from a List
+### Authentication
 
 ```python
-def load_tasks(list_id: str) -> list[dict]:
-    resp = requests.get(f"{BASE_URL}/list/{list_id}/task", headers=HEADERS)
-    resp.raise_for_status()
-    raw = resp.json()["tasks"]
-    return [_map_clickup_task(t) for t in raw]
+# In .env (never commit this file)
+CLICKUP_API_TOKEN=your_personal_api_token
+
+# In src/integrations/clickup_api_client.py
+headers = {"Authorization": os.environ["CLICKUP_API_TOKEN"]}
+# Token is never printed, never included in logs or error messages
 ```
 
-### Step 3 — Map ClickUp Custom Fields
+### Environment variables
 
-ClickUp tasks use a `custom_fields` array. You need to map field names to the
-schema used by the risk reviewer:
+```
+CLICKUP_API_TOKEN=REPLACE_WITH_CLICKUP_PERSONAL_API_TOKEN
+CLICKUP_TEAM_ID=REPLACE_WITH_CLICKUP_WORKSPACE_TEAM_ID
+CLICKUP_SPACE_ID=REPLACE_WITH_CLICKUP_SPACE_ID
+CLICKUP_FOLDER_ID=REPLACE_WITH_CLICKUP_FOLDER_ID
+CLICKUP_LIST_BACKLOG_REQUIREMENTS_ID=REPLACE_WITH_BACKLOG_REQUIREMENTS_LIST_ID
+CLICKUP_LIST_SDLC_RISK_REVIEW_ID=REPLACE_WITH_SDLC_RISK_REVIEW_LIST_ID
+CLICKUP_LIST_QA_DOD_VALIDATION_ID=REPLACE_WITH_QA_DOD_VALIDATION_LIST_ID
+CLICKUP_LIST_GOVERNANCE_HITL_ID=REPLACE_WITH_GOVERNANCE_HITL_LIST_ID
+CLICKUP_LIST_DEMO_DASHBOARD_ID=REPLACE_WITH_DEMO_DASHBOARD_LIST_ID
+CLICKUP_INTEGRATION_MODE=readonly
+CLICKUP_USE_MOCK_FALLBACK=true
+```
+
+### Task schema mapping
+
+ClickUp API v2 responses are mapped to the standard internal task schema:
 
 ```python
-def _map_clickup_task(raw: dict) -> dict:
-    custom = {cf["name"]: cf.get("value") for cf in raw.get("custom_fields", [])}
+def _map_task(raw: dict) -> dict:
+    custom = {cf["name"]: cf.get("value") for cf in raw.get("custom_fields") or []}
     return {
-        "task_id": raw["id"],
-        "title": raw["name"],
+        "task_id": raw.get("id", ""),
+        "title": raw.get("name", ""),
         "description": raw.get("description", ""),
         "status": raw["status"]["status"],
         "priority": raw["priority"]["priority"] if raw.get("priority") else "none",
         "assignee": raw["assignees"][0]["username"] if raw.get("assignees") else "Unassigned",
         "sprint": custom.get("Sprint", ""),
-        "tags": [t["name"] for t in raw.get("tags", [])],
+        "tags": [t["name"] for t in raw.get("tags") or []],
         "acceptance_criteria": custom.get("Acceptance Criteria"),
         "definition_of_done_status": custom.get("DoD Status"),
         "security_notes": custom.get("Security Notes"),
         "architecture_notes": custom.get("Architecture Notes"),
         "qa_notes": custom.get("QA Notes"),
-        "dependencies": [d["task_id"] for d in raw.get("dependencies", [])],
+        "dependencies": [d.get("task_id", "") for d in raw.get("dependencies") or []],
         "due_date": raw.get("due_date"),
     }
 ```
 
-### Step 4 — Post Risk Review as a Comment
+### ClickUp Custom Fields required
+
+To use with real ClickUp tasks, create these custom fields in your workspace:
+
+| Field Name | Type | Purpose |
+|---|---|---|
+| Acceptance Criteria | Long Text | Task completion definition |
+| QA Notes | Long Text | Test plan and cases |
+| Security Notes | Long Text | Security review notes |
+| Architecture Notes | Long Text | Architecture review notes |
+| DoD Status | Dropdown | complete / incomplete / missing |
+| Sprint | Text or Relationship | Sprint name or ID |
+
+### Connection check script
+
+```bash
+python scripts/check_clickup_connection.py
+```
+
+Validates env vars, fetches workspace/space/folder/list/task metadata,
+and prints safe output. Never prints the token. No write operations.
+
+---
+
+## Phase 2 — HITL Write-Back (Future Only)
+
+Write-back is intentionally not implemented in Phase 1.
+All write methods raise `NotImplementedError`.
+
+When a human approves an AI risk finding, Phase 2 will enable:
+
+### Post risk review as a comment
 
 ```python
 def post_review_comment(task_id: str, comment: str) -> None:
     requests.post(
         f"{BASE_URL}/task/{task_id}/comment",
-        headers=HEADERS,
+        headers=headers,
         json={"comment_text": comment},
     )
 ```
 
-### Step 5 — Apply Risk Label Tag
+### Apply risk label tag
 
 ```python
 def set_risk_label(task_id: str, risk_level: str) -> None:
     requests.post(
         f"{BASE_URL}/task/{task_id}/tag/risk-{risk_level.lower()}",
-        headers=HEADERS,
+        headers=headers,
     )
 ```
 
-### Step 6 — Update Task Status
+### Update task status
 
 ```python
 def update_task_status(task_id: str, new_status: str) -> None:
     requests.put(
         f"{BASE_URL}/task/{task_id}",
-        headers=HEADERS,
+        headers=headers,
         json={"status": new_status},
     )
 ```
 
-## Integration Architecture
+### Phase 2 architecture (future)
 
 ```
 ClickUp Webhook (task created / moved to sprint)
@@ -97,37 +141,22 @@ ClickUp Webhook (task created / moved to sprint)
 Risk Gate API endpoint (FastAPI or Lambda)
       │
       ▼
-clickup_adapter.load_tasks() — live API call
+ClickUpApiClient.fetch_tasks() — live API call
       │
       ▼
 RiskReviewer.review(task)
       │
-      ├── post_review_comment(task_id, findings_text)
-      ├── set_risk_label(task_id, risk_level)
-      └── update_task_status(task_id, "Needs Risk Review") if blocked
+      ├── [human approves] → post_review_comment(task_id, findings_text)
+      ├── [human approves] → set_risk_label(task_id, risk_level)
+      └── [human approves] → update_task_status(task_id, "Needs Risk Review")
 ```
 
-## ClickUp Custom Fields Required
-
-To use this system with real ClickUp tasks, create these custom fields in your workspace:
-
-| Field Name | Type | Purpose |
-|-----------|------|---------|
-| Acceptance Criteria | Long Text | Task completion definition |
-| QA Notes | Long Text | Test plan and cases |
-| Security Notes | Long Text | Security review notes |
-| Architecture Notes | Long Text | Architecture review notes |
-| DoD Status | Dropdown | complete / incomplete / missing |
-| Sprint | Text or Relationship | Sprint name or ID |
-
-## Estimated Integration Effort
+### Estimated Phase 2 effort
 
 | Task | Estimate |
-|------|---------|
-| API authentication setup | 1 hour |
-| Task mapping function | 2–4 hours |
+|---|---|
+| HITL approval UI | 4–8 hours |
 | Comment posting | 1 hour |
 | Label/status update | 1 hour |
 | Webhook endpoint | 2–4 hours |
-| Custom field setup in ClickUp | 1–2 hours |
 | **Total** | **~1–2 days** |
