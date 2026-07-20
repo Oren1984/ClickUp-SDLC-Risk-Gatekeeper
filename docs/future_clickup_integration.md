@@ -2,9 +2,12 @@
 
 ## Phase 1 — Read-Only Integration (Implemented)
 
-The read-only ClickUp API integration is complete. The project defaults to mock/demo
-data and activates live API fetching when `CLICKUP_API_TOKEN` is present in the
-environment.
+The read-only ClickUp API client (`src/integrations/clickup_api_client.py`) is complete
+and tested. It is a standalone component: setting `CLICKUP_API_TOKEN` activates live
+fetching from `ClickUpApiClient.fetch_tasks()` / `fetch_task_by_id()` directly, and from
+`scripts/check_clickup_connection.py`. The Streamlit dashboard (`app/streamlit_app.py`)
+is not wired to this client — it always loads mock data via `src/core/clickup_adapter.py`
+regardless of the token.
 
 ### Active endpoints (GET only)
 
@@ -26,6 +29,8 @@ CLICKUP_API_TOKEN=your_personal_api_token
 headers = {"Authorization": os.environ["CLICKUP_API_TOKEN"]}
 # Token is never printed, never included in logs or error messages
 ```
+
+API calls must respect ClickUp rate limits (100 req/min for most endpoints).
 
 ### Environment variables
 
@@ -90,6 +95,26 @@ python scripts/check_clickup_connection.py
 
 Validates env vars, fetches workspace/space/folder/list/task metadata,
 and prints safe output. Never prints the token. No write operations.
+
+### Why the Streamlit dashboard does not use this client yet
+
+1. **Portfolio clarity** — a demo that requires a live ClickUp workspace cannot be
+   reviewed by a recruiter or interviewer without setup. Mock-first means it runs
+   everywhere.
+2. **Architecture separation** — the risk engine should be proven correct on
+   controlled data before connecting to live task data.
+3. **No secrets in the repo** — activating dashboard-level API calls by default would
+   encourage credential management that is out of scope for a portfolio project.
+4. **Stability** — a live API dependency makes the demo brittle. A ClickUp workspace
+   change could break the demo.
+
+Wiring the dashboard to live data would require one additional step: updating
+`app/streamlit_app.py` to call `ClickUpApiClient.fetch_tasks()` instead of
+`clickup_adapter.load_tasks()`. This is intentionally not done in the current version.
+
+The integration will be activated when these conditions are met: a real workspace is
+available, credentials are managed securely, and the mapping from ClickUp custom fields
+to the task schema is validated.
 
 ---
 
@@ -160,3 +185,20 @@ RiskReviewer.review(task)
 | Label/status update | 1 hour |
 | Webhook endpoint | 2–4 hours |
 | **Total** | **~1–2 days** |
+
+---
+
+## Adapter-Based Architecture Benefit
+
+Because the risk engine is decoupled from the data source, the same integration pattern
+applies to any project management tool. Each client implements the `TaskClient` protocol
+from `src/integrations/base.py`; the risk engine and dashboard require no changes.
+
+| Tool | What to implement |
+|---|---|
+| ClickUp | `src/integrations/clickup_api_client.py` (Phase 1 read-only already implemented) |
+| Jira | `src/integrations/jira_client.py` |
+| Linear | `src/integrations/linear_client.py` |
+| Notion | `src/integrations/notion_client.py` |
+| Azure DevOps | `src/integrations/ado_client.py` |
+| Monday.com | `src/integrations/monday_client.py` |

@@ -78,15 +78,30 @@ See [docs/AI_GOVERNANCE_AND_RISK_PRINCIPLES.md](docs/AI_GOVERNANCE_AND_RISK_PRIN
 
 ---
 
-## Optional ClickUp Read-Only API Integration
+## Optional ClickUp Read-Only API Client (Not Wired Into the Dashboard)
 
-**Phase 1 (read-only) is implemented.** The project runs in mock/demo mode by default with no credentials required. Supplying a ClickUp API token activates live data fetching.
+**Phase 1 (read-only) is implemented.** `src/integrations/clickup_api_client.py` is a
+standalone, read-only ClickUp v2 API client. The Streamlit dashboard
+(`app/streamlit_app.py`) always loads mock data through `src/core/clickup_adapter.py`
+and does not call this client — setting `CLICKUP_API_TOKEN` does not change what the
+dashboard shows.
 
-### How it works
+### What the token currently enables
+
+- `python scripts/check_clickup_connection.py` — a safe, read-only connection-check script
+- Direct use of `ClickUpApiClient.fetch_tasks()` / `fetch_task_by_id()` (e.g. in tests or your own scripts)
+
+### What the token does not do
+
+- It does not switch the Streamlit dashboard to live data
+- It does not enable any write-back (comments, labels, status changes)
+- It does not enable background synchronization
+
+### How the client works
 
 - `src/integrations/clickup_api_client.py` — read-only ClickUp v2 API client
-- When `CLICKUP_API_TOKEN` is set: fetches live tasks from configured lists
-- When unconfigured: `fetch_tasks()` returns `[]` and the app continues with mock data
+- When `CLICKUP_API_TOKEN` is set: `fetch_tasks()` / `fetch_task_by_id()` return live data from configured lists
+- When unconfigured: `fetch_tasks()` returns `[]` and `fetch_task_by_id()` returns `None`
 - Write operations (`post_review_comment`, `set_risk_label`, `update_task_status`) raise `NotImplementedError` — Phase 2 (HITL write-back) only
 
 ### Setup (optional)
@@ -117,7 +132,7 @@ See [docs/AI_GOVERNANCE_AND_RISK_PRINCIPLES.md](docs/AI_GOVERNANCE_AND_RISK_PRIN
 - Token is read from environment only — never hardcoded, never logged, never printed
 - All endpoints used are `GET` (read-only)
 - No write-back of any kind in Phase 1
-- If env vars are missing the app silently uses mock data
+- If env vars are missing, `fetch_tasks()`/`fetch_task_by_id()` return empty/`None` — the Streamlit dashboard is unaffected either way, since it does not call this client
 
 See [docs/future_clickup_integration.md](docs/future_clickup_integration.md) for the Phase 2 write-back plan.
 
@@ -130,10 +145,10 @@ data/clickup_demo/tasks.json          ← 20 mock ClickUp-style tasks
          │
          ▼
 src/core/clickup_adapter.py           ← active mock adapter (JSON loader)
-src/integrations/                     ← future-ready integration layer
+src/integrations/                     ← integration adapter layer
   base.py                             ←   adapter protocol / interface
-  mock_client.py                      ←   mock implementation
-  clickup_api_client.py               ←   future placeholder (NotImplementedError)
+  mock_client.py                      ←   mock implementation (wraps clickup_adapter.py)
+  clickup_api_client.py               ←   read-only ClickUp API client (Phase 1 implemented; write methods raise NotImplementedError — Phase 2)
          │
          ▼
 src/core/risk_rules.py                ← 10 SDLC risk rules (deterministic)
@@ -197,11 +212,10 @@ Tests cover the adapter, risk reviewer, compliance checks, and integration skele
 | [docs/AI_GOVERNANCE_AND_RISK_PRINCIPLES.md](docs/AI_GOVERNANCE_AND_RISK_PRINCIPLES.md) | AI governance framework and responsible use principles |
 | [docs/HUMAN_IN_THE_LOOP_WORKFLOW.md](docs/HUMAN_IN_THE_LOOP_WORKFLOW.md) | Human-in-the-loop review process and decision outcomes |
 | [docs/EVALUATION_SCENARIOS.md](docs/EVALUATION_SCENARIOS.md) | 10 demo scenarios with inputs, outputs, and rationale |
-| [docs/FUTURE_CLICKUP_API_READINESS.md](docs/FUTURE_CLICKUP_API_READINESS.md) | ClickUp API integration roadmap and boundary design |
 | [docs/architecture.md](docs/architecture.md) | Component architecture and data flow |
 | [docs/workflow.md](docs/workflow.md) | SDLC gate flow and Agile/Scrum fit |
 | [docs/demo_scenarios.md](docs/demo_scenarios.md) | All 20 mock tasks and what each one demonstrates |
-| [docs/future_clickup_integration.md](docs/future_clickup_integration.md) | Step-by-step ClickUp API integration guide |
+| [docs/future_clickup_integration.md](docs/future_clickup_integration.md) | ClickUp API integration roadmap, boundary design, and step-by-step guide |
 | [docs/limitations.md](docs/limitations.md) | Known limitations and scope boundaries |
 | [docs/testing_strategy.md](docs/testing_strategy.md) | Testing approach and coverage |
 

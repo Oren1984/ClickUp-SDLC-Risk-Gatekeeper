@@ -11,7 +11,7 @@ readable, demonstrable system.
 ```
 app/streamlit_app.py
         │
-        ├── src/core/clickup_adapter.py   ← data loading (mock or API)
+        ├── src/core/clickup_adapter.py   ← data loading (mock only)
         │           │
         │           └── data/clickup_demo/tasks.json
         │
@@ -31,6 +31,9 @@ app/streamlit_app.py
 - Provides `load_tasks()`, `get_task_by_id()`, and data access functions
 - Contains stub functions with TODO comments for future ClickUp API integration
 - Mock-first: no network calls, no credentials required
+- The separate `src/integrations/clickup_api_client.py` implements real read-only
+  ClickUp API calls (Phase 1), but is not called by this adapter or by
+  `app/streamlit_app.py` — see `docs/future_clickup_integration.md`
 
 ### `risk_rules.py`
 - Contains keyword lists (SECURITY_KEYWORDS, AI_KEYWORDS, ARCHITECTURE_KEYWORDS, etc.)
@@ -72,6 +75,17 @@ JSON file → load_tasks() → [task dict] → RiskReviewer.review()
                                              ↓
                                    Streamlit display
 ```
+
+## Reference Data Files
+
+`data/clickup_demo/policies.json`, `definition_of_done.json`, and
+`architecture_guidelines.json` are loaded by `clickup_adapter.py`
+(`load_policies()`, `load_definition_of_done()`, `load_architecture_guidelines()`)
+and covered by tests, but they are reference/demonstration data only. The active
+risk thresholds and gate logic live in `risk_rules.py` and `risk_reviewer.py` as
+Python constants — the values in `policies.json` currently match them by
+convention, but nothing synchronizes the two. Changing `policies.json` has no
+effect on the running risk engine.
 
 ## Design Decisions
 

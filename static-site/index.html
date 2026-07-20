@@ -625,9 +625,11 @@
     <h2 class="section-title">Phase 1: Read-Only API Integration</h2>
     <p class="section-intro">
       The project runs in mock/demo mode by default — no credentials required.
-      Phase 1 adds an optional read-only ClickUp API client that activates
-      when <code>CLICKUP_API_TOKEN</code> is set in the environment.
-      No secrets are committed. Mock fallback is always preserved.
+      Phase 1 adds an optional, standalone read-only ClickUp API client that
+      activates when <code>CLICKUP_API_TOKEN</code> is set in the environment.
+      The Streamlit demo dashboard itself is not wired to this client and always
+      loads local mock data. No secrets are committed. Mock fallback is always
+      preserved.
     </p>
 
     <div class="arch-block">
@@ -635,7 +637,7 @@
 
 <span class="hl">src/integrations/base.py</span>              <span class="dim">← TaskClient protocol (interface)</span>
 <span class="hl">src/integrations/mock_client.py</span>       <span class="ok">← default: reads local JSON (no credentials)</span>
-<span class="hl">src/integrations/clickup_api_client.py</span> <span class="ok">← Phase 1: read-only API client (active)</span>
+<span class="hl">src/integrations/clickup_api_client.py</span> <span class="ok">← Phase 1: implemented, standalone (not called by the dashboard)</span>
              │
              ▼
 <span class="dim">── Read-only endpoints (Phase 1, active) ───────────────────────────</span>

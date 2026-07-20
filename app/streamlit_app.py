@@ -117,7 +117,7 @@ with st.sidebar:
 
     st.divider()
     st.caption("Demo mode — all data is local mock JSON. No API keys or credentials required.")
-    st.caption("See `src/integrations/clickup_api_client.py` for the future-ready API skeleton and `docs/FUTURE_CLICKUP_API_READINESS.md` for the integration plan.")
+    st.caption("`src/integrations/clickup_api_client.py` implements read-only fetch methods (Phase 1) — not used by this dashboard. Write-back is not implemented (Phase 2). See `docs/future_clickup_integration.md`.")
 
 
 # ── Filter reports ────────────────────────────────────────────────────────
@@ -411,15 +411,23 @@ The gatekeeper is a **decision-support tool**, not an autonomous decision-maker.
 - **No task is automatically blocked or approved** without human review
 - See `docs/AI_GOVERNANCE_AND_RISK_PRINCIPLES.md` and `docs/HUMAN_IN_THE_LOOP_WORKFLOW.md`
 
-### Future ClickUp API Readiness
+### ClickUp API Integration Status
 
-The ClickUp API integration is **intentionally not active** in this version. The project is demo-first.
+This dashboard always loads mock data through `src/core/clickup_adapter.py` — it does not
+call the ClickUp API, regardless of whether `CLICKUP_API_TOKEN` is set.
 
-- `src/integrations/clickup_api_client.py` is a future-ready placeholder (raises `NotImplementedError`)
-- `src/integrations/mock_client.py` is the active adapter using local JSON
-- `src/integrations/base.py` defines the `TaskClient` protocol all adapters must satisfy
-- Real integration requires only implementing the adapter — the risk engine stays unchanged
-- See `docs/FUTURE_CLICKUP_API_READINESS.md` for the integration roadmap
+- **Phase 1 (implemented, tested):** `src/integrations/clickup_api_client.py` provides
+  read-only `fetch_tasks()` and `fetch_task_by_id()` methods against the ClickUp v2 API.
+  They are usable directly and via `scripts/check_clickup_connection.py`, but are not
+  called by this dashboard.
+- **Phase 2 (not implemented):** write-back methods (`post_review_comment`, `set_risk_label`,
+  `update_task_status`) raise `NotImplementedError` by design.
+- `src/integrations/mock_client.py` implements the same `TaskClient` protocol as the API
+  client, wrapping `clickup_adapter.py`'s local JSON loader.
+- `src/integrations/base.py` defines the `TaskClient` protocol all adapters must satisfy.
+- Wiring the dashboard to live data would require swapping the adapter call in
+  `app/streamlit_app.py` — the risk engine stays unchanged.
+- See `docs/future_clickup_integration.md` for the integration roadmap.
 
 ---
 
