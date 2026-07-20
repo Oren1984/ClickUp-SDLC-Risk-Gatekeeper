@@ -10,7 +10,12 @@
       "Bash(kill %1)",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\ORENS\\\\rag-retrieval-evaluation-lab\\\\src\" -Recurse -File | Select-Object FullName | ForEach-Object { $_.FullName -replace [regex]::Escape\\(\"C:\\\\Users\\\\ORENS\\\\rag-retrieval-evaluation-lab\\\\\"\\), \"\" })",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(git -C \"C:\\\\Users\\\\ORENS\\\\ClickUp-SDLC-Risk-Gatekeeper\" ls-files)",
+      "Bash(grep -i \"\\\\.env$\")",
+      "Bash(git -C \"C:\\\\Users\\\\ORENS\\\\ClickUp-SDLC-Risk-Gatekeeper\" log --all --full-history -- .env)",
+      "Bash(git -C \"C:\\\\Users\\\\ORENS\\\\ClickUp-SDLC-Risk-Gatekeeper\" status --porcelain=v1 .env)",
+      "Bash(git -C \"C:\\\\Users\\\\ORENS\\\\ClickUp-SDLC-Risk-Gatekeeper\" check-ignore -v .env)"
     ]
   }
 }
