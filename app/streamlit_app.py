@@ -359,7 +359,7 @@ In Agile/Scrum engineering teams, tasks often enter development sprints with:
 - Missing or vague acceptance criteria
 - No QA test plan
 - Security-sensitive changes without a threat model
-- AI/LLM features without safety guardrails
+- AI/LLM features without documented readiness signals (evaluation criteria, groundedness, cost awareness, fallback behavior, permission sensitivity, or guardrails)
 - Architecture-impacting changes without a design review
 - Compliance requirements (GDPR, PCI, HIPAA) without evidence
 
@@ -372,7 +372,7 @@ before they become expensive bugs, security incidents, or compliance violations.
 
 1. Tasks are loaded from a ClickUp-compatible JSON structure (mock data in this demo)
 2. Each task is analyzed by a deterministic rule-based risk engine (`src/core/risk_reviewer.py`)
-3. 10 SDLC risk rules are applied covering: acceptance criteria, QA, security, AI guardrails, architecture, compliance, due dates, and dependencies
+3. 10 SDLC risk rules are applied covering: acceptance criteria, QA, security, AI task readiness, architecture, compliance, due dates, and dependencies
 4. Each task receives a **risk score (0–100)**, **risk level**, **gate decision**, **findings**, and **recommendations**
 5. The dashboard provides a project-wide risk overview and per-task drill-down
 
@@ -386,7 +386,7 @@ before they become expensive bugs, security incidents, or compliance violations.
 | RULE-002 | No QA notes or test plan |
 | RULE-003 | Definition of Done not confirmed |
 | RULE-004 | Security-sensitive task without security notes |
-| RULE-005 | AI/LLM task without guardrails or fallback |
+| RULE-005 | AI/LLM task with no documented readiness signal (evaluation criteria, groundedness, cost awareness, fallback, tool/data permission sensitivity, or guardrails) |
 | RULE-006 | Architecture-impacting task without architecture notes |
 | RULE-007 | Critical priority with vague scope |
 | RULE-008 | Task blocked by unresolved dependency |

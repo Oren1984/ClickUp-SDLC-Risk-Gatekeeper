@@ -4,6 +4,14 @@
 
 Oren Salami | Technology Project Management + AI Tools
 
+This is a **Technology Project Management / SDLC Risk Management learning and portfolio project**, not a commercial product. It demonstrates Shift-Left risk thinking, QA readiness, compliance awareness, explainable risk scoring, and AI-governance-aware human-in-the-loop decision support.
+
+**Pitch:** SDLC Risk Gatekeeper = Shift-Left Risk & Readiness Control *before* development execution.
+
+> This project is sometimes shown alongside a separate portfolio project, the *Smart PMO Agent*. They are conceptually distinct and are not technically integrated:
+> - **Gatekeeper (this project):** Are we ready to start this work safely and correctly?
+> - **Smart PMO Agent:** Once work is running, are we executing it effectively?
+
 ---
 
 ## Business Problem
@@ -13,7 +21,7 @@ In Agile and Scrum teams, tasks regularly enter development sprints missing crit
 - Vague or missing acceptance criteria
 - No QA test plan or Definition of Done confirmation
 - Security-sensitive changes without a threat model
-- AI/LLM features without safety guardrails or fallback behavior
+- AI/LLM features without documented readiness signals — evaluation criteria, groundedness/source quality, cost awareness, fallback behavior, tool/data permission sensitivity, or guardrails
 - Architecture-impacting changes without design review
 - Compliance tasks (GDPR, PCI-DSS, HIPAA) without documented evidence
 

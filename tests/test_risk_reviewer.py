@@ -135,6 +135,35 @@ class TestAIGuardrailRule:
         result = reviewer.review(task)
         assert "RULE-005" not in result.triggered_rules
 
+    def test_ai_readiness_finding_lists_all_dimensions(self, reviewer):
+        task = _task(
+            title="Add LLM chatbot feature",
+            tags=["llm", "ai"],
+            qa_notes=None,
+            security_notes=None,
+            architecture_notes=None,
+        )
+        result = reviewer.review(task)
+        finding_text = " ".join(result.findings + result.recommendations).lower()
+        for dimension in (
+            "evaluation criteria",
+            "groundedness",
+            "cost",
+            "fallback",
+            "tool/data permission",
+            "guardrail",
+        ):
+            assert dimension in finding_text
+
+    def test_ai_task_with_partial_readiness_notes_still_passes(self, reviewer):
+        task = _task(
+            title="Add AI recommendation feature",
+            tags=["ai", "ml model"],
+            qa_notes="Least privilege data access only; no write scopes granted to the model.",
+        )
+        result = reviewer.review(task)
+        assert "RULE-005" not in result.triggered_rules
+
 
 class TestArchitectureRule:
     def test_database_task_without_arch_notes_triggers(self, reviewer):

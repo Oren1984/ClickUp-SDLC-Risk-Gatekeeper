@@ -35,7 +35,7 @@ The risk engine evaluates each task against 10 SDLC rules:
 | QA notes and test plan | Is a test approach defined? |
 | Definition of Done | Is the DoD confirmed as complete? |
 | Security sensitivity | If security-tagged, are security notes present? |
-| AI/LLM guardrails | If AI-tagged, are safety controls documented? |
+| AI/LLM task readiness | If AI-tagged, is at least one readiness signal documented — evaluation criteria, groundedness/source quality, AI/API cost awareness, fallback/degraded-mode behavior, tool/data permission sensitivity, or guardrails? |
 | Architecture impact | If architecture-tagged, are design review notes present? |
 | Scope clarity | Is a critical task sufficiently defined? |
 | Dependency blockers | Is the task blocked by an unresolved dependency? |

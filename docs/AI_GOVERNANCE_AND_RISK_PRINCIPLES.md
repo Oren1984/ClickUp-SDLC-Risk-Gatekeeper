@@ -98,6 +98,23 @@ If this system is adapted for real use:
 
 ---
 
+## AI Task Readiness Indicators
+
+For tasks tagged as AI/LLM work, the gatekeeper checks task notes for documented readiness signals across six dimensions before development starts:
+
+- **Evaluation criteria** — how output quality will be judged
+- **Groundedness / source quality** — expectations for grounding outputs in reliable sources
+- **AI/API cost awareness** — awareness of token or API cost implications
+- **Fallback / degraded-mode readiness** — what happens if the AI component is unavailable or wrong
+- **Tool/data permission sensitivity** — what data or actions the AI component can access
+- **Guardrails** — content filters, bias checks, or human-in-the-loop escalation
+
+These are **readiness and risk indicators only**. If none of the six dimensions are documented, the rule flags a gap and recommends the team document them before development starts — it does not decide whether the task may proceed. A human reviewer still makes that call.
+
+This is intentionally lightweight. The gatekeeper does **not** implement real-time token enforcement, multi-model routing, automatic provider failover, just-in-time privilege infrastructure, dynamic production credentials, vector-store lifecycle management, or autonomous security enforcement. Those are runtime engineering concerns for the AI feature itself, not planning-stage readiness checks, and are explicitly out of scope for this project.
+
+---
+
 ## Limitations of AI Review
 
 The current system uses deterministic rule-based analysis, not large language model inference. Its limitations include:

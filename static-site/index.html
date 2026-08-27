@@ -38,6 +38,7 @@
       gaps — before work enters development.
     </p>
     <p class="hero-sub">AI-assisted SDLC Risk &amp; Compliance Gatekeeper for ClickUp-style software delivery workflows &mdash; not a chatbot, not a ClickUp clone, a governance gate.</p>
+    <p class="hero-sub">Pitch: Shift-Left Risk &amp; Readiness Control before development execution. A Technology Project Management / SDLC Risk Management learning and portfolio project.</p>
     <a href="#run" class="btn btn-primary">Run the Demo</a>
     <a href="#flows" class="btn btn-outline">See Core Flows</a>
     <p class="hero-meta">
@@ -77,8 +78,8 @@
       </div>
       <div class="problem-card">
         <span class="icon">🤖</span>
-        <strong>AI Features Without Guardrails</strong>
-        <p>LLM features go into development without fallback behavior, safety controls, or content filters.</p>
+        <strong>AI Features Without Readiness Signals</strong>
+        <p>LLM features go into development without evaluation criteria, groundedness expectations, cost awareness, fallback behavior, permission scoping, or guardrails defined.</p>
       </div>
       <div class="problem-card">
         <span class="icon">🏗️</span>
@@ -258,7 +259,7 @@
           <tr><td>RULE-002</td><td><span class="tag tag-green">QA</span></td><td>No QA notes or test plan</td><td>15</td></tr>
           <tr><td>RULE-003</td><td><span class="tag tag-slate">Process</span></td><td>Definition of Done not confirmed</td><td>15</td></tr>
           <tr><td>RULE-004</td><td><span class="tag tag-red">Security</span></td><td>Security-sensitive task without security notes</td><td>30</td></tr>
-          <tr><td>RULE-005</td><td><span class="tag tag-red">AI Safety</span></td><td>AI/LLM task without guardrails or fallback behavior</td><td>35</td></tr>
+          <tr><td>RULE-005</td><td><span class="tag tag-red">AI Safety</span></td><td>AI/LLM task with no documented readiness signal (evaluation criteria, groundedness, cost awareness, fallback, tool/data permission sensitivity, or guardrails)</td><td>35</td></tr>
           <tr><td>RULE-006</td><td><span class="tag tag-purple">Architecture</span></td><td>Architecture-impacting task without design review</td><td>25</td></tr>
           <tr><td>RULE-007</td><td><span class="tag tag-blue">Scope</span></td><td>Critical priority task with vague scope</td><td>20</td></tr>
           <tr><td>RULE-008</td><td><span class="tag tag-amber">Dependency</span></td><td>Blocked by unresolved dependency</td><td>25</td></tr>
@@ -554,6 +555,13 @@
         It shows how SDLC, QA, Security, Architecture Review, Compliance, and risk management
         can be embedded into task-management workflows using lightweight, deterministic Python.
         No LLM inference required. No cloud dependency. Runs entirely on local data.
+      </p>
+      <p style="font-size:.88rem; color:var(--text-muted); line-height:1.75; margin-top:14px;">
+        This project is sometimes shown alongside a separate portfolio project, the
+        <strong>Smart PMO Agent</strong>. They are conceptually related but not technically
+        integrated: the <strong>Gatekeeper</strong> asks "are we ready to start this work
+        safely and correctly?" — the <strong>Smart PMO Agent</strong> asks "once work is
+        running, are we executing it effectively?"
       </p>
     </div>
   </div>

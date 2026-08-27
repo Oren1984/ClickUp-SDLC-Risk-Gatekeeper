@@ -129,6 +129,30 @@ def rule_security_task_without_notes(task: dict) -> Optional[RuleFinding]:
     return None
 
 
+AI_READINESS_DIMENSIONS = {
+    "evaluation criteria": [
+        "evaluation criteria", "eval criteria", "success metric", "accuracy target",
+        "quality bar", "eval set", "benchmark",
+    ],
+    "groundedness / source quality": [
+        "groundedness", "grounded", "source quality", "retrieval", "citation", "hallucin",
+    ],
+    "AI/API cost awareness": [
+        "token budget", "api cost", "cost per", "usage limit", "cost awareness", "rate limit",
+    ],
+    "fallback / degraded-mode readiness": [
+        "fallback", "degraded mode", "graceful degradation", "circuit breaker", "backup behavior",
+    ],
+    "tool/data permission sensitivity": [
+        "tool permission", "data access", "scoped access", "least privilege",
+        "read-only access", "permission boundary", "data sensitivity",
+    ],
+    "guardrails / safety controls": [
+        "guardrail", "bias", "monitor", "human review", "override", "safety", "content filter",
+    ],
+}
+
+
 def rule_ai_task_without_guardrails(task: dict) -> Optional[RuleFinding]:
     combined = _text(task, "title", "description", "tags")
     if not _has_keyword(combined, AI_KEYWORDS):
@@ -136,18 +160,29 @@ def rule_ai_task_without_guardrails(task: dict) -> Optional[RuleFinding]:
     qa = str(task.get("qa_notes") or "")
     sec = str(task.get("security_notes") or "")
     arch = str(task.get("architecture_notes") or "")
-    guardrail_text = (qa + " " + sec + " " + arch).lower()
-    guardrail_keywords = [
-        "guardrail", "fallback", "hallucin", "bias", "monitor",
-        "rate limit", "human review", "override", "safety", "content filter",
+    readiness_text = (qa + " " + sec + " " + arch).lower()
+
+    covered = [
+        dim for dim, keywords in AI_READINESS_DIMENSIONS.items()
+        if _has_keyword(readiness_text, keywords)
     ]
-    if not _has_keyword(guardrail_text, guardrail_keywords):
+    if not covered:
+        missing = ", ".join(AI_READINESS_DIMENSIONS.keys())
         return RuleFinding(
             rule_id="RULE-005",
             severity="critical",
             weight=35,
-            finding="AI/ML/LLM task lacks guardrails, fallback mechanisms, or safety controls.",
-            recommendation="Define output validation guardrails, fallback behavior, bias/safety review, rate limiting, and human-in-the-loop escalation.",
+            finding=(
+                "AI/ML/LLM task has no documented readiness signals across any of the "
+                f"reviewed dimensions: {missing}."
+            ),
+            recommendation=(
+                "Before development, document: evaluation criteria for output quality; "
+                "expected groundedness / source quality; AI or API cost awareness; "
+                "fallback or degraded-mode behavior if the AI component is unavailable; "
+                "tool/data permission sensitivity (what the AI can access or act on); "
+                "and guardrails such as content filters or human-in-the-loop escalation."
+            ),
         )
     return None
 

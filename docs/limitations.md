@@ -45,6 +45,7 @@ design choices for a focused portfolio demonstration.
 ## AI / LLM
 
 - No LLM is used in this project. The risk engine is purely rule-based.
+- The AI task readiness check (RULE-005) looks for keyword evidence of six readiness dimensions (evaluation criteria, groundedness/source quality, cost awareness, fallback readiness, tool/data permission sensitivity, guardrails). It only checks that at least one dimension is mentioned in the task notes — it does not verify the documented plan is actually correct or complete, and it does not enforce anything at runtime (no token limits, no permission checks, no automatic failover).
 - Adding an LLM layer for free-text analysis would improve detection quality but is outside the scope of this demo.
 
 ---

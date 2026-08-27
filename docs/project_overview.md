@@ -2,6 +2,10 @@
 
 **Oren Salami | Technology Project Management + AI Tools**
 
+This is a **Technology Project Management / SDLC Risk Management learning and portfolio project**. It demonstrates Shift-Left readiness gating, QA and compliance awareness, explainable risk scoring, and human-in-the-loop AI governance — not a production security product or an autonomous SDLC controller.
+
+**Pitch:** SDLC Risk Gatekeeper = Shift-Left Risk & Readiness Control before development execution.
+
 ## What is this project?
 
 This is an AI-assisted SDLC quality gate that automatically reviews technical tasks
@@ -10,6 +14,13 @@ and compliance.
 
 It is designed to slot into an Agile/Scrum workflow between **Sprint Planning** and
 **Development Start**, providing a fast, automated risk assessment of every task.
+
+### Relationship to the Smart PMO Agent (conceptual only)
+
+This project is sometimes presented alongside a separate portfolio project, the *Smart PMO Agent*. The two are conceptually complementary but **not technically integrated**:
+
+- **Gatekeeper (this project):** Are we ready to start this work safely and correctly?
+- **Smart PMO Agent:** Once work is running, are we executing it effectively?
 
 ## Why does it matter?
 
