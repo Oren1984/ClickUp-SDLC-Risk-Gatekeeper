@@ -1,253 +1,102 @@
 # ClickUp SDLC Risk Gatekeeper
 
-**AI-assisted SDLC Risk & Compliance Gatekeeper for ClickUp-style software delivery workflows.**
+**Author:** Oren Salami · **Category:** Project Planning & Delivery
 
-Oren Salami | Technology Project Management + AI Tools
+A readiness check for software tasks *before* development starts. It reviews ClickUp-style tasks for missing acceptance criteria, QA plans, Definition of Done, security, architecture, compliance, and dependency gaps, then gives each task an explainable risk score and a recommended next step for a human reviewer.
 
-This is a **Technology Project Management / SDLC Risk Management learning and portfolio project**, not a commercial product. It demonstrates Shift-Left risk thinking, QA readiness, compliance awareness, explainable risk scoring, and AI-governance-aware human-in-the-loop decision support.
-
-**Pitch:** SDLC Risk Gatekeeper = Shift-Left Risk & Readiness Control *before* development execution.
-
-> This project is sometimes shown alongside a separate portfolio project, the *Smart PMO Agent*. They are conceptually distinct and are not technically integrated:
-> - **Gatekeeper (this project):** Are we ready to start this work safely and correctly?
-> - **Smart PMO Agent:** Once work is running, are we executing it effectively?
+This is a learning and portfolio project, not a commercial product. It runs entirely on local mock data.
 
 ---
 
-## Business Problem
+## Why This Project
 
-In Agile and Scrum teams, tasks regularly enter development sprints missing critical information:
+Tasks often enter a sprint with gaps: vague acceptance criteria, no test plan, a security-sensitive change with no threat model, or a blocked dependency. Finding those gaps during planning is cheap; finding them in production is not. This project explores how delivery planning can make those risks visible early and consistently.
 
-- Vague or missing acceptance criteria
-- No QA test plan or Definition of Done confirmation
-- Security-sensitive changes without a threat model
-- AI/LLM features without documented readiness signals — evaluation criteria, groundedness/source quality, cost awareness, fallback behavior, tool/data permission sensitivity, or guardrails
-- Architecture-impacting changes without design review
-- Compliance tasks (GDPR, PCI-DSS, HIPAA) without documented evidence
+## What It Does
 
-Catching these gaps in planning costs nothing. Catching them in production is expensive.
+- Runs **10 deterministic rules** over each task (acceptance criteria, QA notes, DoD, security, AI/LLM readiness, architecture, critical-priority scope, dependencies, compliance evidence, due dates)
+- Produces a **risk score (0–100)**, **risk level** (Low / Medium / High / Critical), **recommended gate decision**, **findings**, and **recommendations**
+- Flags **GDPR, PCI-DSS, HIPAA, SOX, and general security** evidence gaps in a separate compliance view
+- Shows everything in a **Streamlit dashboard** with sprint, status, risk, and gate filters
 
----
+Recommended gate decisions: Approved for Development · Needs Clarification · Requires QA Review · Requires Security Review · Requires Architecture Review · Blocked. Rules, weights, and workflow: [docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md).
 
-## What the System Does
+## How It Works
 
-The **ClickUp SDLC Risk Gatekeeper** is a governance and risk-review assistant for tasks, user stories, QA readiness, security and compliance gaps, missing acceptance criteria, and Definition of Done alignment.
+```mermaid
+flowchart LR
+    A["Mock ClickUp-style tasks<br/>data/clickup_demo/tasks.json"] --> B["10 SDLC risk rules"]
+    A --> C["Compliance checks"]
+    B --> D["Score, level,<br/>gate recommendation"]
+    C --> E["Compliance gaps"]
+    D --> F["Streamlit dashboard"]
+    E --> F
+    F --> G{"Human reviewer<br/>PM / QA / Tech Lead"}
+    G -->|Gaps found| H["Task owner updates task"]
+    H --> A
+    G -->|Ready| I["Development"]
+```
 
-It is **not** a generic chatbot and **not** a ClickUp clone. It is a structured risk gate that sits between backlog refinement and development start.
+The score is the sum of triggered rule weights, capped at 100. The human review step happens outside the app; the dashboard does not record decisions.
 
-For each task, the system:
+## Project in Pictures
 
-1. Loads the task from a ClickUp-compatible data source (mock JSON in this demo)
-2. Runs 10 deterministic SDLC risk rules across quality, QA, security, architecture, compliance, and dependency dimensions
-3. Produces a **risk score (0–100)**, **risk level** (Low / Medium / High / Critical), **gate decision**, **findings**, and **recommendations**
-4. Presents results in a Streamlit dashboard for human review and final decision
+The images below are **screenshots of a manually built ClickUp workspace** (an external service) that mirrors the project's workflow. They are not screenshots of this app, and the workspace is not populated by this code. See [docs/DEMO_AND_OPERATIONS.md](docs/DEMO_AND_OPERATIONS.md#images).
 
-| Gate Decision | Meaning |
+| Workspace lists and progress | Risk review queues |
 |---|---|
-| ✅ Approved for Development | Task passes all quality gates — ready to enter sprint |
-| 💬 Needs Clarification | Minor gaps must be resolved before development starts |
-| 🧪 Requires QA Review | QA lead must review and approve before dev starts |
-| 🔒 Requires Security Review | Security or compliance team must sign off |
-| 🏗️ Requires Architecture Review | Tech lead or architect must review system impact |
-| 🚫 Blocked | Cannot proceed — blocking dependency or critical gap unresolved |
+| ![ClickUp folder with the five demo lists and their progress](docs/screenshots/03-clickup-risk-gate-folder-structure-progress.png) | ![ClickUp dashboard listing Critical Risks, Security Review Queue, Blocked and Approved overviews](docs/screenshots/02-clickup-risk-gate-dashboard-priority-overview.png) |
 
----
+## Example Workflow
 
-## Why ClickUp-Style Workflows
+Using demo task **TASK-005 — Implement payment processing integration with Stripe**:
 
-ClickUp is a widely used project management platform in software delivery teams. Its task structure — titles, descriptions, acceptance criteria, assignees, priorities, tags, custom fields, due dates — maps naturally to SDLC governance requirements.
+1. The task has no acceptance criteria, QA notes, or confirmed DoD, is marked critical with a short scope, and is tagged `pci` with no compliance evidence.
+2. Rules 001, 002, 003, 006, 007, and 009 fire (plus RULE-010 once its due date has passed); the score caps at **100 (Critical)**.
+3. The recommended gate is **Requires Security Review**, and the compliance view shows a PCI-DSS evidence gap.
+4. A reviewer reads the findings, the owner adds the missing details, and the task is reviewed again.
 
-This project uses a **ClickUp-compatible JSON schema** for all mock data, making the path to a real ClickUp workspace practical and well-defined. The same risk logic can also apply to Jira, Linear, Notion, Azure DevOps, or any tool with a task API — the adapter layer is designed to be swapped without touching the core engine.
+All 20 demo tasks are listed in [docs/DEMO_AND_OPERATIONS.md](docs/DEMO_AND_OPERATIONS.md#demo-scenarios).
 
----
+## Architecture at a Glance
 
-## Demo Mode
+| Part | Location | Status |
+|---|---|---|
+| Mock data loader (dashboard data source) | `src/core/clickup_adapter.py` | Working, default |
+| Rules, scoring, compliance, reports | `src/core/` | Working |
+| Dashboard | `app/streamlit_app.py` | Working |
+| Read-only ClickUp API client | `src/integrations/clickup_api_client.py` | Optional; not used by the dashboard |
+| Write-back (comments, labels, status) | API client methods | Not implemented (`NotImplementedError`) |
 
-This project runs entirely on **local mock data**. No ClickUp credentials, no API keys, and no cloud setup are required.
-
-All 20 demo tasks are realistic but fictional, stored in `data/clickup_demo/tasks.json`. Each task was designed to trigger a specific combination of risk rules for demonstration purposes.
-
-The `src/core/clickup_adapter.py` module is the active data source. It loads local JSON. When real ClickUp API integration is needed in the future, only this adapter needs to change — the risk engine remains untouched.
-
----
-
-## AI Governance & Human-in-the-Loop
-
-The risk gatekeeper is designed as a **decision-support tool**, not an autonomous decision-maker.
-
-**Core principles:**
-- AI recommendations are **advisory**. Final gate decisions are owned by the PM, QA lead, or Tech Lead.
-- Every finding is **explainable**: each rule states exactly what is missing and why it matters.
-- The system **flags uncertainty** rather than guessing — if data is missing, it reports the gap.
-- **No task is automatically approved or rejected** without a human reviewing the output.
-- The PM / QA / Tech Lead remains responsible for all decisions.
-
-See [docs/AI_GOVERNANCE_AND_RISK_PRINCIPLES.md](docs/AI_GOVERNANCE_AND_RISK_PRINCIPLES.md) and [docs/HUMAN_IN_THE_LOOP_WORKFLOW.md](docs/HUMAN_IN_THE_LOOP_WORKFLOW.md) for the full governance framework.
-
----
-
-## Optional ClickUp Read-Only API Client (Not Wired Into the Dashboard)
-
-**Phase 1 (read-only) is implemented.** `src/integrations/clickup_api_client.py` is a
-standalone, read-only ClickUp v2 API client. The Streamlit dashboard
-(`app/streamlit_app.py`) always loads mock data through `src/core/clickup_adapter.py`
-and does not call this client — setting `CLICKUP_API_TOKEN` does not change what the
-dashboard shows.
-
-### What the token currently enables
-
-- `python scripts/check_clickup_connection.py` — a safe, read-only connection-check script
-- Direct use of `ClickUpApiClient.fetch_tasks()` / `fetch_task_by_id()` (e.g. in tests or your own scripts)
-
-### What the token does not do
-
-- It does not switch the Streamlit dashboard to live data
-- It does not enable any write-back (comments, labels, status changes)
-- It does not enable background synchronization
-
-### How the client works
-
-- `src/integrations/clickup_api_client.py` — read-only ClickUp v2 API client
-- When `CLICKUP_API_TOKEN` is set: `fetch_tasks()` / `fetch_task_by_id()` return live data from configured lists
-- When unconfigured: `fetch_tasks()` returns `[]` and `fetch_task_by_id()` returns `None`
-- Write operations (`post_review_comment`, `set_risk_label`, `update_task_status`) raise `NotImplementedError` — Phase 2 (HITL write-back) only
-
-### Setup (optional)
-
-1. Copy `.env.example` to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-2. Fill in the real values in `.env` (never commit this file):
-   ```
-   CLICKUP_API_TOKEN=your_personal_api_token
-   CLICKUP_TEAM_ID=your_workspace_team_id
-   CLICKUP_SPACE_ID=your_space_id
-   CLICKUP_FOLDER_ID=your_folder_id
-   CLICKUP_LIST_BACKLOG_REQUIREMENTS_ID=...
-   CLICKUP_LIST_SDLC_RISK_REVIEW_ID=...
-   CLICKUP_LIST_QA_DOD_VALIDATION_ID=...
-   CLICKUP_LIST_GOVERNANCE_HITL_ID=...
-   CLICKUP_LIST_DEMO_DASHBOARD_ID=...
-   ```
-3. Verify the connection (safe read-only check, token is never printed):
-   ```bash
-   python scripts/check_clickup_connection.py
-   ```
-
-### Security boundaries
-
-- Token is read from environment only — never hardcoded, never logged, never printed
-- All endpoints used are `GET` (read-only)
-- No write-back of any kind in Phase 1
-- If env vars are missing, `fetch_tasks()`/`fetch_task_by_id()` return empty/`None` — the Streamlit dashboard is unaffected either way, since it does not call this client
-
-See [docs/future_clickup_integration.md](docs/future_clickup_integration.md) for the Phase 2 write-back plan.
-
----
-
-## Architecture
-
-```
-data/clickup_demo/tasks.json          ← 20 mock ClickUp-style tasks
-         │
-         ▼
-src/core/clickup_adapter.py           ← active mock adapter (JSON loader)
-src/integrations/                     ← integration adapter layer
-  base.py                             ←   adapter protocol / interface
-  mock_client.py                      ←   mock implementation (wraps clickup_adapter.py)
-  clickup_api_client.py               ←   read-only ClickUp API client (Phase 1 implemented; write methods raise NotImplementedError — Phase 2)
-         │
-         ▼
-src/core/risk_rules.py                ← 10 SDLC risk rules (deterministic)
-src/core/risk_reviewer.py             ← scoring + gate decision logic
-src/core/compliance_checks.py         ← GDPR / PCI-DSS / HIPAA / SOX
-         │
-         ▼
-src/core/report_generator.py          ← per-task + project summary report
-         │
-         ▼
-app/streamlit_app.py                  ← Streamlit SDLC risk dashboard
-```
-
-All components are pure Python. No external services, no cloud, no database required.
-
----
+Pure Python, no database or external services. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Run Locally
 
 ```bash
-pip install -r requirements.txt
-streamlit run app/streamlit_app.py
+pip install streamlit pytest requests python-dotenv
+streamlit run app/streamlit_app.py      # http://localhost:8501
 ```
 
-Open: http://localhost:8501
+No credentials are needed. Docker, configuration, and troubleshooting are covered in [docs/DEMO_AND_OPERATIONS.md](docs/DEMO_AND_OPERATIONS.md). The Docker build currently needs a `requirements.txt`, which the repository does not have.
 
-**Static portfolio site:**
-```bash
-cd static-site
-python -m http.server 8000
-```
+## Human Review & Boundaries
 
-Open: http://localhost:8000
+- Outputs are **advisory**. The engine recommends; people decide.
+- Rules use **keyword and field-completeness checks**, so they can miss real risks or flag false ones.
+- The engine reads task metadata only — not code, attachments, or links.
+- `RULE-010` compares due dates to today's date. All demo due dates fall in June–July 2026, so it now flags every demo task as overdue, which raises scores.
+- Not a substitute for formal security, legal, or compliance review.
 
----
+More: [docs/GOVERNANCE_AND_VALIDATION.md](docs/GOVERNANCE_AND_VALIDATION.md)
 
-## Run with Docker
+## Documentation & Validation
 
-```bash
-docker compose up --build
-```
-
-Open: http://localhost:8501
-
----
-
-## Testing
-
-```bash
-pytest
-```
-
-Tests cover the adapter, risk reviewer, compliance checks, and integration skeleton. All tests use mock data — no external dependencies required.
-
----
-
-## Documentation
-
-| Document | Purpose |
+| Document | Covers |
 |---|---|
-| [docs/AI_GOVERNANCE_AND_RISK_PRINCIPLES.md](docs/AI_GOVERNANCE_AND_RISK_PRINCIPLES.md) | AI governance framework and responsible use principles |
-| [docs/HUMAN_IN_THE_LOOP_WORKFLOW.md](docs/HUMAN_IN_THE_LOOP_WORKFLOW.md) | Human-in-the-loop review process and decision outcomes |
-| [docs/EVALUATION_SCENARIOS.md](docs/EVALUATION_SCENARIOS.md) | 10 demo scenarios with inputs, outputs, and rationale |
-| [docs/architecture.md](docs/architecture.md) | Component architecture and data flow |
-| [docs/workflow.md](docs/workflow.md) | SDLC gate flow and Agile/Scrum fit |
-| [docs/demo_scenarios.md](docs/demo_scenarios.md) | All 20 mock tasks and what each one demonstrates |
-| [docs/future_clickup_integration.md](docs/future_clickup_integration.md) | ClickUp API integration roadmap, boundary design, and step-by-step guide |
-| [docs/limitations.md](docs/limitations.md) | Known limitations and scope boundaries |
-| [docs/testing_strategy.md](docs/testing_strategy.md) | Testing approach and coverage |
+| [PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) | Problem, purpose, capabilities, rules, workflow, example |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Components, technologies, data flow, integration status |
+| [DEMO_AND_OPERATIONS.md](docs/DEMO_AND_OPERATIONS.md) | Install, startup, configuration, demo tasks, images, troubleshooting |
+| [GOVERNANCE_AND_VALIDATION.md](docs/GOVERNANCE_AND_VALIDATION.md) | Human oversight, boundaries, security, testing, limitations, future ideas |
 
----
+Tests: `pytest` (64 tests, offline, no credentials).
 
-## Portfolio & Career Positioning
-
-**Category:** Technology Project Management + AI Tools
-
-This project demonstrates:
-
-| Skill Area | What is Demonstrated |
-|---|---|
-| Technology Project Management | SDLC gate design, sprint quality control, task readiness validation |
-| QA Thinking | Automated QA readiness checking, DoD enforcement, test plan visibility |
-| Risk & Compliance | Pre-development risk scoring, GDPR/PCI/HIPAA gap detection |
-| AI Governance | Human-in-the-Loop design, explainable AI outputs, advisory-only AI |
-| AI Engineering | Adapter-based integration pattern, mock-first architecture |
-| Software Delivery | Agile/Scrum fit, dependency management, sprint risk visibility |
-
-This is a **practical AI-assisted process improvement tool** for technical project management — not a pure ML engineering project. It shows how SDLC governance, QA, security review, architecture review, compliance checking, and risk management can be embedded into task-management workflows using lightweight, deterministic Python. No LLM inference required. Runs entirely on local data.
-
----
-
-## License
-
-MIT License. See [LICENSE](LICENSE).

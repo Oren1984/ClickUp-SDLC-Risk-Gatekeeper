@@ -2,7 +2,7 @@
 
 ## Project Purpose
 
-**ClickUp SDLC Risk Gatekeeper** is an AI-assisted SDLC risk and governance tool for ClickUp-style software delivery workflows. It is a portfolio project demonstrating Technology Project Management, QA thinking, SDLC governance, AI risk detection, and practical AI engineering.
+**ClickUp SDLC Risk Gatekeeper** is a Project Planning & Delivery portfolio project. It checks ClickUp-style tasks for readiness gaps before development starts, using deterministic rules (no LLM), and presents explainable results for human review.
 
 This document defines how AI coding agents and human contributors should work in this repository.
 
@@ -11,13 +11,11 @@ This document defines how AI coding agents and human contributors should work in
 ## What Agents Are Allowed to Modify
 
 - `src/core/` — risk rules, reviewer, compliance checks, adapter, report generator
-- `src/integrations/` — integration adapters (mock and future placeholder only)
+- `src/integrations/` — task client protocol, mock client, read-only ClickUp client
 - `app/streamlit_app.py` — Streamlit dashboard UI and visible text
 - `tests/` — pytest tests for all modules
-- `docs/` — documentation improvements and additions
+- `docs/` — the four documentation files (`PROJECT_OVERVIEW.md`, `ARCHITECTURE.md`, `DEMO_AND_OPERATIONS.md`, `GOVERNANCE_AND_VALIDATION.md`) and images; do not add more documentation files
 - `data/clickup_demo/` — mock task data, policies, DoD, architecture guidelines
-- `static-site/` — static HTML/CSS portfolio site
-- `requirements.txt` — dependency additions (keep minimal)
 - `README.md`, `AGENTS.md` — project-level documentation
 
 ---
@@ -43,6 +41,7 @@ This document defines how AI coding agents and human contributors should work in
 - Do **not** add databases, message queues, microservices, or external cloud services
 - Do **not** introduce FastAPI, Flask, or additional web servers unless explicitly requested
 - Do **not** add new infrastructure dependencies (Redis, Celery, Docker registries, etc.)
+- Keep Python dependencies minimal
 - Keep the architecture flat, readable, and explainable to a non-engineer
 
 ### Mock/demo mode
@@ -69,11 +68,9 @@ This document defines how AI coding agents and human contributors should work in
 
 ## Default Behavior Rules
 
-1. **Mock data is the default.** All demo runs must work without credentials.
-2. **Read-only only.** `clickup_api_client.py` fetches via GET endpoints only. Write ops raise `NotImplementedError`. Do not implement write-back.
-3. **Tests must pass.** Run `pytest` before submitting any change.
-4. **Portfolio clarity is a requirement.** Code should be readable by a reviewer without deep Python expertise.
-5. **No unnecessary comments.** Only add a comment when the WHY is non-obvious — a hidden constraint, a workaround, a subtle invariant.
+1. **Tests must pass.** Run `pytest` before submitting any change.
+2. **Portfolio clarity is a requirement.** Code should be readable by a reviewer without deep Python expertise.
+3. **No unnecessary comments.** Only add a comment when the WHY is non-obvious — a hidden constraint, a workaround, a subtle invariant.
 
 ---
 
@@ -85,7 +82,7 @@ If you need to support a new project management tool (Jira, Linear, Notion, etc.
 2. Implement the `TaskClient` protocol defined in `src/integrations/base.py`
 3. Methods that require real API credentials must raise `NotImplementedError` until integration is explicitly activated
 4. Add tests in `tests/test_integrations.py`
-5. Document the integration boundary in `docs/future_clickup_integration.md`
+5. Document the integration status in `docs/ARCHITECTURE.md`
 6. Do **not** change the default data source in `app/streamlit_app.py`
 
 ---
